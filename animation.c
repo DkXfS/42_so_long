@@ -4,7 +4,7 @@ void update_frames(struct animation* anim, struct timeval current_time)
 {
     if (current_time.tv_sec > anim->last_frame_time.tv_sec ||
         (current_time.tv_sec == anim->last_frame_time.tv_sec &&
-         current_time.tv_usec >= (anim->last_frame_time.tv_usec + 1000000))) // 15FPS // 66666us
+         current_time.tv_usec >= (anim->last_frame_time.tv_usec + 66666))) // 15FPS // 66666us
     {
 
         anim->last_frame_time.tv_sec = current_time.tv_sec;
@@ -12,7 +12,7 @@ void update_frames(struct animation* anim, struct timeval current_time)
         for (int i = 0; i < CHARACTERS_COUNT; i++)
         {
             anim->characters[i].curr_frame++;
-            if (anim->characters[i].animations[anim->characters[i].state][anim->characters[i].curr_frame] == NULL)
+            if (anim->characters[i].animations[anim->characters[i].state][anim->characters[i].direction][anim->characters[i].curr_frame] == NULL)
                 anim->characters[i].curr_frame = 0;
         }
     

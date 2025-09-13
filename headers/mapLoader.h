@@ -2,6 +2,8 @@
 #define MAP_LOADER_H
 
 // #include <stdio.h>
+#include "game_data.h"
+#include "navigation.h"
 #include "colors.h"
 #include "../ft_printf/ft_printf.h"
 #include "../libft/libft.h"
@@ -11,14 +13,6 @@
 #include <unistd.h>
 
 #include <string.h> // For strerror
-
-struct mapStats
-{
-    int width;
-    int height;
-    int playerCount;
-    int collectibleCount;
-};
 
 char** loadMap(const char* filename, struct mapStats* stats);
 

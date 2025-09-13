@@ -1,32 +1,90 @@
 #include "headers/movement.h"
 
-void update_character_position(struct animation *anim, struct key_states *keys, char **map, int tileWH)
+void check_collisions(struct state *game_state)
 {
-    int mapX = anim->characters[0].x / tileWH;
-    int mapY = anim->characters[0].y / tileWH;
-    int mapModX = anim->characters[0].x % tileWH;
-    int mapModY = anim->characters[0].y % tileWH;
+    int x1 = game_state->animation.characters[0].x / game_state->tileWH;
+    int y1 = game_state->animation.characters[0].y / game_state->tileWH;
+    int x2 = (game_state->animation.characters[0].x + game_state->tileWH) / game_state->tileWH;
+    int y2 = (game_state->animation.characters[0].y + game_state->tileWH) / game_state->tileWH;
 
+    if (game_state->map[y1][x1] == 'C' || game_state->map[y1][x2] == 'C' ||
+        game_state->map[y2][x1] == 'C' || game_state->map[y2][x2] == 'C')
+    {
+        // Collectible found
+        game_state->collected++;
+        ft_printf("Collected: %d\n", game_state->collected);
+        // Remove collectible from map
+        if (game_state->map[y1][x1] == 'C')
+            game_state->map[y1][x1] = '0';
+        if (game_state->map[y1][x2] == 'C')
+            game_state->map[y1][x2] = '0';
+        if (game_state->map[y2][x1] == 'C')
+            game_state->map[y2][x1] = '0';
+        if (game_state->map[y2][x2] == 'C')
+            game_state->map[y2][x2] = '0';
+    }
+    if (game_state->map[y1][x1] == 'E' || game_state->map[y1][x2] == 'E' ||
+        game_state->map[y2][x1] == 'E' || game_state->map[y2][x2] == 'E')
+    {
+        if (game_state->collected >= game_state->stats.collectibleCount)
+        {
+            ft_printf("All collectibles gathered! You win!\n");
+            exit_func(game_state);
+        }
+        else
+        {
+            ft_printf("Collect all items before exiting! (%d/%d)\n", game_state->collected, game_state->stats.collectibleCount);
+        }
+    }
+}
 
-    if (keys->up)
+void update_character_position(struct state *game_state)
+{
+    int mapX = game_state->animation.characters[0].x / game_state->tileWH;
+    int mapY = game_state->animation.characters[0].y / game_state->tileWH;
+    int mapModX = game_state->animation.characters[0].x % game_state->tileWH;
+    int mapModY = game_state->animation.characters[0].y % game_state->tileWH;
+    char a, b;
+
+    if (game_state->keys.up)
     {
-        if(mapModY >= MOVE_SPEED || (map[mapY - 1][mapX] != '1' && map[mapY - 1][mapX + (mapModX > 0)] != '1'))
-            anim->characters[0].y -= MOVE_SPEED;
+        a = game_state->map[mapY - 1][mapX];
+        b = game_state->map[mapY - 1][mapX + (mapModX > 0)];
+
+        if(mapModY >= MOVE_SPEED || (a != '1' && b != '1'))
+            game_state->animation.characters[0].y -= MOVE_SPEED;
+        
+        // if (mapModY <= MOVE_SPEED && (a == 'C' || b == 'C'))
+        // {
+        //     game_state->map[mapY - 1][mapX + (mapModX > 0)] = '0';
+        //     game_state->collected++;
+        //     ft_printf("Collected: %d\n", game_state->collected);
+        // }
     }
-    if (keys->down)
+    if (game_state->keys.down)
     {
-        if(map[mapY + 1][mapX] != '1' && map[mapY + 1][mapX + (mapModX > 0)] != '1')
-            anim->characters[0].y += MOVE_SPEED;
+        a = game_state->map[mapY + 1][mapX];
+        b = game_state->map[mapY + 1][mapX + (mapModX > 0)];
+
+        if(a != '1' && b != '1')
+            game_state->animation.characters[0].y += MOVE_SPEED;
+
+        // if(a == 'C' || b == 'C')
+        // {
+        //     game_state->map[mapY + 1][mapX + (mapModX > 0)] = '0';
+        //     game_state->collected++;
+        //     ft_printf("Collected: %d\n", game_state->collected);
+        // }
     }
-    if (keys->left)
+    if (game_state->keys.left)
     {
-        if(mapModX >= MOVE_SPEED || (map[mapY][mapX - 1] != '1' && map[mapY + (mapModY > 0)][mapX - 1] != '1'))
-            anim->characters[0].x -= MOVE_SPEED;
+        if(mapModX >= MOVE_SPEED || (game_state->map[mapY][mapX - 1] != '1' && game_state->map[mapY + (mapModY > 0)][mapX - 1] != '1'))
+            game_state->animation.characters[0].x -= MOVE_SPEED;
     }
-    if (keys->right)
+    if (game_state->keys.right)
     {
-        if(map[mapY][mapX + 1] != '1' && map[mapY + (mapModY > 0)][mapX + 1] != '1')
-            anim->characters[0].x += MOVE_SPEED;
+        if(game_state->map[mapY][mapX + 1] != '1' && game_state->map[mapY + (mapModY > 0)][mapX + 1] != '1')
+            game_state->animation.characters[0].x += MOVE_SPEED;
     }
 
     return;

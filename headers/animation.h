@@ -10,6 +10,11 @@
 #define STATE_IDLE 0
 #define STATE_WALK 1
 
+#define ANIM_LEFT 0
+#define ANIM_RIGHT 1
+#define ANIM_UP 2
+#define ANIM_DOWN 3
+
 #define MAIN_CHARACTER 0
 #define ENEMY_CHARACTER 1
 #define COLLECTIBLE 2
@@ -22,8 +27,9 @@ struct character
     int x;
     int y;
     int state; // e.g., idle, walking, jumping
+    int direction; // e.g., left, right, up, down
     int curr_frame; // current frame in animation
-    void* animations[2][3];
+    void* animations[2][4][16];
 };
 
 struct element
@@ -41,9 +47,6 @@ struct animation
     struct character characters[CHARACTERS_COUNT];
 };
 
-// Update animation frames for all characters and world elements.
-// Arrays decay to pointers here; the sizes are governed by the
-// CHARACTERS_COUNT and WORLD_ANIM_COUNT macros.
 void update_frames(struct animation* anim, struct timeval current_time);
 
 #endif

@@ -3,9 +3,12 @@
 
 #include "animation.h"
 #include "controls.h"
+#include "game_data.h"
+#include "so_long.h"
 
 #define MOVE_SPEED 2
 
-void update_character_position(struct animation *anim, struct key_states *keys, char **map, int tileWH);
+void update_character_position(struct state *game_state);
+void check_collisions(struct state *game_state);
 
 #endif

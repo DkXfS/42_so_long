@@ -7,96 +7,41 @@
 //     suseconds_t  tv_usec;  /* and microseconds */
 // };
 
-// int load_assets(struct state *game_state)
-// {
-//     int assetWH;
-
-//     // Load wall sprite
-//     game_state->animation.world_elements[0].asset.type = WALL;
-//     game_state->animation.world_elements[0].asset.frames = malloc(sizeof(void**) * 1); // 1 state: static
-//     if (!game_state->animation.world_elements[0].asset.frames)
-//     {
-//         ft_printf(RED"Error\n%s\n"RESET, "Failed to allocate memory for wall state");
-//         return 1;
-//     }
-//     game_state->animation.world_elements[0].asset.frames[STATE_IDLE] = malloc(sizeof(void*) * 2); // 1 frame + NULL terminator
-//     if (!game_state->animation.world_elements[0].asset.frames[STATE_IDLE])
-//     {
-//         ft_printf(RED"Error\n%s\n"RESET, "Failed to allocate memory for wall asset pointer");
-//         free(game_state->animation.world_elements[0].asset.frames);
-//         return 1;
-//     }
-//     game_state->animation.world_elements[0].asset.frames[STATE_IDLE][0] = mlx_png_file_to_image(game_state->conn_id, "tex/wall.png", &assetWH, &assetWH);
-//     if (!game_state->animation.world_elements[0].asset.frames[STATE_IDLE][0])
-//     {
-//         ft_printf(RED"Error\n%s\n"RESET, "Failed to load wall image");
-//         free(game_state->animation.world_elements[0].asset.frames[STATE_IDLE]);
-//         free(game_state->animation.world_elements[0].asset.frames);
-//         return 1;
-//     }
-
-//     // Load player sprites
-//     game_state->animation.characters[0].asset.type = MAIN_CHARACTER;
-//     game_state->animation.characters[0].asset.frames = malloc(sizeof(void**) * 2); // 2 states: idle, walk
-//     if (!game_state->animation.characters[0].asset.frames)
-//     {
-//         ft_printf(RED"Error\n%s\n"RESET, "Failed to allocate memory for player asset frames");
-//         return 1;
-//     }
-//     game_state
-//     game_state->animation.characters[0].asset.frames[STATE_WALK][0] = mlx_png_file_to_image(game_state->conn_id, "tex/rogue/rogue_w1.png", &assetWH, &assetWH);
-//     game_state->animation.characters[0].asset.frames[STATE_WALK][1] = mlx_png_file_to_image(game_state->conn_id, "tex/rogue/rogue_w2.png", &assetWH, &assetWH);
-//     game_state->animation.characters[0].asset.frames[STATE_WALK][2] = NULL; // End of animation frames
-//     for (int i = 0; i < 2; i++)
-//     {
-//         if (!game_state->animation.characters[0].asset.frames[STATE_WALK][i])
-//         {
-//             ft_printf(RED"Error\n%s\n"RESET, "Failed to load player walk sprite");
-//             return 1;
-//         }
-//     }
-    
-//     return 0;
-// }
-
 int instance_chars(struct state *game_state)
 {
     // Initialize character animation state and frame counters
     for (int i = 0; i < CHARACTERS_COUNT; i++)
     {
-        game_state->animation.characters[i].state = STATE_WALK; // default state
+        game_state->animation.characters[i].state = STATE_IDLE; // default state
+        game_state->animation.characters[i].direction = ANIM_UP; // default direction
         game_state->animation.characters[i].curr_frame = 0;
         game_state->animation.characters[i].x = -1; // Example positions
         game_state->animation.characters[i].y = -1; // Example positions
 
-        // Load player sprites
-        game_state->animation.characters[i].animations[STATE_WALK][0] = game_state->assets[0];
-        game_state->animation.characters[i].animations[STATE_WALK][1] = game_state->assets[1];
-        game_state->animation.characters[i].animations[STATE_WALK][2] = NULL; // End of animation frames
-    }
-    return 1;
-}
-
-int load_assets(struct state *game_state)
-{
-    for(int i = 0; i < ASSET_COUNT; i++)
-        game_state->assets[i] = NULL;
-
-    for(int i = 0; i < ASSET_COUNT; i++)
-    {
-        game_state->assets[i] = mlx_png_file_to_image(game_state->conn_id, assetFiles[i], &game_state->tileWH, &game_state->tileWH);
-        if (!game_state->assets[i])
+        // Load player walk sprites
+        int j = 0;
+        while (j < 15)
         {
-            ft_printf(RED"Error\nFailed to load asset: %s\n"RESET, assetFiles[i]);
-            for(int j = 0; j < i; j++)
-            {
-                if (game_state->assets[j])
-                    mlx_destroy_image(game_state->conn_id, game_state->assets[j]);
-            }
-            return 0;
+            game_state->animation.characters[i].animations[STATE_WALK][ANIM_DOWN][j] = game_state->assets[j + 5];
+            game_state->animation.characters[i].animations[STATE_WALK][ANIM_UP][j] = game_state->assets[j + 20];
+            game_state->animation.characters[i].animations[STATE_WALK][ANIM_LEFT][j] = game_state->assets[j + 35];
+            game_state->animation.characters[i].animations[STATE_WALK][ANIM_RIGHT][j] = game_state->assets[j + 50];
+            j++;
         }
-    }
+        game_state->animation.characters[i].animations[STATE_WALK][ANIM_DOWN][j] = NULL;
+        game_state->animation.characters[i].animations[STATE_WALK][ANIM_UP][j] = NULL;
+        game_state->animation.characters[i].animations[STATE_WALK][ANIM_LEFT][j] = NULL;
+        game_state->animation.characters[i].animations[STATE_WALK][ANIM_RIGHT][j] = NULL;
 
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_DOWN][0] = game_state->assets[65];
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_DOWN][1] = NULL;
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_UP][0] = game_state->assets[66];
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_UP][1] = NULL;
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_LEFT][0] = game_state->assets[67];
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_LEFT][1] = NULL;
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_RIGHT][0] = game_state->assets[68];
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_RIGHT][1] = NULL;
+    }
     return 1;
 }
 
@@ -107,7 +52,8 @@ int exit_func(void *param)
     free(game_state->conn_id);
 
     // Free the allocated memory for the map
-    for (int i = 0; game_state->map[i]; i++) {
+    for (int i = 0; game_state->map[i]; i++)
+    {
         free(game_state->map[i]);
     }
     free(game_state->map);
@@ -139,18 +85,21 @@ void draw(struct state *game_state)
             char tile = game_state->map[y][x];
             void *img = NULL;
             if (tile == '1') // Wall
-                img = game_state->assets[2];
+                img = game_state->assets[0];
             else if (tile == '0') // Grass
-                img = game_state->assets[3];
+                img = game_state->assets[1];
             else if (tile == 'C') // Collectible
             {
-                img = game_state->assets[4];
-                mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->assets[3], x * game_state->tileWH, y * game_state->tileWH);
+                img = game_state->assets[2];
+                mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->assets[1], x * game_state->tileWH, y * game_state->tileWH);
             }
             else if (tile == 'E') // Exit
             {
-                img = game_state->assets[5];
-                mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->assets[3], x * game_state->tileWH, y * game_state->tileWH);
+                if (game_state->collected >= game_state->stats.collectibleCount)
+                    img = game_state->assets[4];
+                else
+                    img = game_state->assets[3];
+                mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->assets[1], x * game_state->tileWH, y * game_state->tileWH);
             }
             else if (tile == 'P') // Player start position
             {
@@ -159,7 +108,7 @@ void draw(struct state *game_state)
                     game_state->animation.characters[0].x = x * game_state->tileWH;
                     game_state->animation.characters[0].y = y * game_state->tileWH;
                 }
-                img = game_state->assets[3]; // Draw grass under player
+                img = game_state->assets[1]; // Draw grass under player
             }
 
             if (img)
@@ -177,29 +126,31 @@ void draw(struct state *game_state)
     for (int i = 0; i < CHARACTERS_COUNT; i++)
     {
         mlx_put_image_to_window(game_state->conn_id, game_state->win_id,
-                               game_state->animation.characters[i].animations[game_state->animation.characters[i].state][game_state->animation.characters[i].curr_frame],
+                               game_state->animation.characters[i].animations[game_state->animation.characters[i].state][game_state->animation.characters[i].direction][game_state->animation.characters[i].curr_frame],
                                game_state->animation.characters[i].x, game_state->animation.characters[i].y);
     }
 
     char *fps = ft_itoa(1000000/time_diff);
     mlx_string_put(game_state->conn_id, game_state->win_id, 10, 10, 0x00F1F1, fps);
-    ft_printf("FPS: %s\n", fps);
+    // ft_printf("FPS: %s\n", fps);
     free(fps);
 }
 
 int screen_refresh(void *param)
 {
     struct state *game_state = (struct state *)param;
-    gettimeofday(&game_state->current_time, NULL);
-    // printf("Current time: %ld.%06d\n", game_state->current_time.tv_sec, game_state->current_time.tv_usec);
-
-    update_character_position(&game_state->animation, &game_state->keys, game_state->map, game_state->tileWH);
 
     if(game_state->keys.escRelease)
     {
         ft_printf("Escape key pressed\n");
         exit_func(game_state);
     }
+
+    gettimeofday(&game_state->current_time, NULL);
+    // printf("Current time: %ld.%06d\n", game_state->current_time.tv_sec, game_state->current_time.tv_usec);
+
+    update_character_position(game_state);
+    check_collisions(game_state);
 
     update_frames(&game_state->animation, game_state->current_time);
     draw(game_state);
@@ -215,6 +166,7 @@ void init_state(struct state *game_state)
     game_state->moveCount = 0;
     game_state->tileWH = 0;
     ft_bzero(game_state->assets, sizeof(game_state->assets));
+    game_state->collected = 0;
     game_state->map = NULL;
     game_state->keys = (struct key_states){0};
     game_state->stats = (struct mapStats){0};
@@ -241,6 +193,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    ft_printf(GRN"Map loaded successfully!\n"RESET);
+
     // Initialize animation timing
     gettimeofday(&game_state.animation.last_frame_time, NULL);
 
@@ -251,7 +205,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    game_state.win_id = mlx_new_window(game_state.conn_id, 800, 600, "so_long");
+    game_state.win_id = mlx_new_window(game_state.conn_id, GAME_RES_X, GAME_RES_Y, "so_long");
     if (!game_state.win_id)
     {
         ft_printf(RED"Error\nFailed to create window\n"RESET);
@@ -279,8 +233,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    mlx_hook(game_state.win_id, 2, 1L << 0, key_press_hook, &game_state.keys);       // Mask unused on Macos Metal
-    mlx_hook(game_state.win_id, 3, 1L << 1, key_release_hook, &game_state.keys);       // Mask unused on Macos Metal
+    mlx_hook(game_state.win_id, 2, 1L << 0, key_press_hook, &game_state);       // Mask unused on Macos Metal
+    mlx_hook(game_state.win_id, 3, 1L << 1, key_release_hook, &game_state);       // Mask unused on Macos Metal
     mlx_hook(game_state.win_id, 17, 1L << 2, exit_func, &game_state);       // Mask unused on Macos Metal
     // mlx_key_hook(game_state.win_id, key_hook, &game_state);
     mlx_mouse_hook(game_state.win_id, mouse_hook, &game_state);

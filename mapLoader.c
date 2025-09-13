@@ -1,10 +1,5 @@
 #include "headers/mapLoader.h"
 
-// int navigability()
-// {
-//     return 1;
-// }
-
 int validateMap(char* buffer, struct mapStats* stats)
 {
     int firstLineLength = 0;  // Length of the first line to compare against
@@ -12,8 +7,10 @@ int validateMap(char* buffer, struct mapStats* stats)
     int wallCount = 0;        // Count of wall characters in current line
     int height = 0;           // Total number of lines (height of the map)
     int playerCount = 0;
-    int hasExit = 0;
+    int exitCount = 0;
     int collectibleCount = 0;
+    struct posList* lastCollectible = NULL;
+    struct posList* newCollectible = NULL;
     int hasClosedPlayableArea = 0;
     int i = 0;
     
@@ -79,11 +76,38 @@ int validateMap(char* buffer, struct mapStats* stats)
                 if (buffer[i] == '1')
                     wallCount++;
                 else if (buffer[i] == 'P')
+                {
                     playerCount++;
+                    stats->playerX = currentLineLength;
+                    stats->playerY = height;
+                }
                 else if (buffer[i] == 'E')
-                    hasExit = 1;
+                {
+                    exitCount++;
+                    stats->exitX = currentLineLength;
+                    stats->exitY = height;
+                }
                 else if (buffer[i] == 'C')
+                {
                     collectibleCount++;
+                    newCollectible = (struct posList*)malloc(sizeof(struct posList));
+                    if (!newCollectible)
+                    {
+                        perror("Failed to allocate memory for collectible position");
+                        return 0;
+                    }
+
+                    newCollectible->x = currentLineLength;
+                    newCollectible->y = height;
+                    newCollectible->next = NULL;
+
+                    // Add to the collectibles list
+                    if (!stats->collectibles)
+                        stats->collectibles = newCollectible;
+                    else
+                        lastCollectible->next = newCollectible;
+                    lastCollectible = newCollectible;
+                }
 
                 currentLineLength++;
                 i++;
@@ -105,8 +129,20 @@ int validateMap(char* buffer, struct mapStats* stats)
                 return 0;
             }
 
+            if (playerCount > 1)
+            {
+                ft_printf(RED"Error\n%s\n"RESET, "Map must contain exactly one player start position");
+                return 0;
+            }
+
+            if (exitCount > 1)
+            {
+                ft_printf(RED"Error\n%s\n"RESET, "Map must contain exactly one exit");
+                return 0;
+            }
+
             // Check if this is the last line (all walls)
-            if (wallCount == firstLineLength && playerCount == 1 && hasExit && collectibleCount)
+            if (wallCount == firstLineLength && playerCount == 1 && exitCount == 1 && collectibleCount)
             {
                 hasClosedPlayableArea = 1; // Valid map
             }
@@ -123,7 +159,6 @@ int validateMap(char* buffer, struct mapStats* stats)
 
     stats->width = firstLineLength;
     stats->height = height;
-    stats->playerCount = playerCount;
     stats->collectibleCount = collectibleCount;
 
     if (!hasClosedPlayableArea)
@@ -157,8 +192,6 @@ char** loadMap(const char* filename, struct mapStats* stats)
         bytesRead = read(fd, buffer, sizeof(buffer) - 1);
     }
     close(fd);
-
-    ft_printf(GRN"Map character count:\n%d\n"RESET, totalRead);
 
     mapStr = (char*)malloc(totalRead + 1);
     if (!mapStr)
@@ -202,6 +235,15 @@ char** loadMap(const char* filename, struct mapStats* stats)
         return NULL;
     }
     free(trimmedMapStr);
+
+    if (!isCompletable(mapArr, stats))
+    {
+        ft_printf(RED"Error\n%s\n"RESET, "No valid completion path in map");
+        for (int i = 0; mapArr[i]; i++)
+            free(mapArr[i]);
+        free(mapArr);
+        return NULL;
+    }
 
     return mapArr;
 }
