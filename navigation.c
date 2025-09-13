@@ -44,12 +44,12 @@ int isCompletable(char** map, struct mapStats* stats)
     struct posList* currentCollectible = stats->collectibles;
     while (currentCollectible)
     {
-        int partialLength = aStarAlgo(currentCollectible->x, currentCollectible->y, stats->playerX, stats->playerY, map, stats);
+        int partialLength = aStarAlgo(currentCollectible->x, currentCollectible->y, stats->playerX, stats->playerY, map, stats, NULL);
         if (partialLength == -1)
             return 0;
         currentCollectible = currentCollectible->next;
     }
-    int exitLength = aStarAlgo(stats->exitX, stats->exitY, stats->playerX, stats->playerY, map, stats);
+    int exitLength = aStarAlgo(stats->exitX, stats->exitY, stats->playerX, stats->playerY, map, stats, NULL);
     if (exitLength == -1)
         return 0;
     return 1;
@@ -62,12 +62,6 @@ int manhattanDistance(int x1, int y1, int x2, int y2)
 
 int isNavigable(int x, int y, char** map, struct mapStats* stats)
 {
-    // if (x < 0 || x >= stats->width || y < 0 || y >= stats->height)
-    //     return 0;
-    // if (map[y][x] == '1')
-    //     return 0;
-    // return 1;
-
     return (x >= 0 && x < stats->width && y > 0 && y < stats->height && map[y][x] != '1');
 }
 
@@ -82,7 +76,28 @@ void printPath(int height, int width, struct node nodes[height][width], int dest
     printf("(%d, %d) -> ", destX, destY);
 }
 
-int aStarAlgo(int destX, int destY, int startX, int startY, char** map, struct mapStats* stats)
+void free_pos_list(struct posList* path)
+{
+    while (path)
+    {
+        struct posList* tmp = path->next;
+        free(path);
+        path = tmp;
+    }
+}
+
+static struct posList* push_front(struct posList* head, int x, int y)
+{
+    struct posList* node = (struct posList*)malloc(sizeof(struct posList));
+    if (!node)
+        return head;
+    node->x = x;
+    node->y = y;
+    node->next = head;
+    return node;
+}
+
+int aStarAlgo(int destX, int destY, int startX, int startY, char** map, struct mapStats* stats, struct posList** outPath)
 {
     int steps = 0;
     int openListSize = 0;
@@ -91,6 +106,16 @@ int aStarAlgo(int destX, int destY, int startX, int startY, char** map, struct m
     struct node* currentNode;
     int explorableRows[] = {-1, 0, 1, 0};
     int explorableCols[] = {0, -1, 0, 1};
+
+    if (destX == startX && destY == startY)
+    {
+        if (outPath)
+            *outPath = push_front(*outPath, startX, startY);
+        return 0;
+    }
+
+    if (outPath)
+        *outPath = NULL;
 
     int i = 0;
     while (i < stats->height)
@@ -153,9 +178,18 @@ int aStarAlgo(int destX, int destY, int startX, int startY, char** map, struct m
                 {
                     nodes[nextY][nextX].parent_x = currentNode->x;
                     nodes[nextY][nextX].parent_y = currentNode->y;
-                    // printf("Path:\n");
-                    // printPath(stats->height, stats->width, nodes, destX, destY);
-                    steps = 1;
+                    int cx = destX;
+                    int cy = destY;
+                    while (cx != startX || cy != startY)
+                    {
+                        steps++;
+                        if (outPath)
+                            *outPath = push_front(*outPath, cx, cy);
+                        cx = nodes[cy][cx].parent_x;
+                        cy = nodes[cy][cx].parent_y;
+                    }
+                    if (outPath)
+                        *outPath = push_front(*outPath, startX, startY);
                     return steps;
                 }
                 else if (!nodes[nextY][nextX].closed)
