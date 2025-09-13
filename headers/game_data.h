@@ -7,7 +7,7 @@
 #include "colors.h"
 #include "animation.h"
 
-#define ASSET_COUNT 69
+#define ASSET_COUNT 70
 
 static char* assetFiles[ASSET_COUNT] = {
     "tex/wall0.png",
@@ -15,6 +15,7 @@ static char* assetFiles[ASSET_COUNT] = {
     "tex/pouch.png",
     "tex/door.png",
     "tex/doorOpen.png",
+    "tex/text_bg.png",
     "tex/rogue/walk/rogue_D01.png",
     "tex/rogue/walk/rogue_D03.png",
     "tex/rogue/walk/rogue_D05.png",

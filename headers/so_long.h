@@ -11,8 +11,9 @@
 #include "../libft/libft.h"
 #include "../ft_printf/ft_printf.h"
 
-#define GAME_RES_X 800
-#define GAME_RES_Y 600
+#define NUM_TILES_WIDTH 15
+#define NUM_TILES_HEIGHT 12
+#define UI_OFFSET 32
 
 int exit_func(void* param);
 int screen_refresh(void *param);
