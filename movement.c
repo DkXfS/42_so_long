@@ -28,13 +28,31 @@ void check_collisions(struct state *game_state)
     {
         if (game_state->collected >= game_state->stats.collectibleCount)
         {
-            ft_printf("All collectibles gathered! You win!\n");
+            ft_printf(GRN"Level Completed!"RESET"\n Moves: %d\n", (int)game_state->moveCount);
             exit_func(game_state);
         }
         // else
         // {
         //     ft_printf("Collect all items before exiting! (%d/%d)\n", game_state->collected, game_state->stats.collectibleCount);
         // }
+    }
+
+    int enemyX1 = game_state->animation.characters[1].x;
+    int enemyY1 = game_state->animation.characters[1].y;
+    int enemyX2 = (game_state->animation.characters[1].x + game_state->tileWH);
+    int enemyY2 = (game_state->animation.characters[1].y + game_state->tileWH);
+    x1 = game_state->animation.characters[0].x;
+    y1 = game_state->animation.characters[0].y;
+    x2 = (game_state->animation.characters[0].x + game_state->tileWH);
+    y2 = (game_state->animation.characters[0].y + game_state->tileWH);
+
+    if (((x1 <= enemyX2 && y1 <= enemyY2) && (x1 >= enemyX1 && y1 >= enemyY1)) ||
+        ((x2 >= enemyX1 && y2 >= enemyY1) && (x2 <= enemyX2 && y2 <= enemyY2)))
+    {
+        ft_printf("Caught by the enemy! Game Over!\n");
+        printf("Player 1(%d, %d), 2(%d, %d)\n", x1, y1, x2, y2);
+        printf("Enemy 1(%d, %d), 2(%d, %d)\n", enemyX1, enemyY1, enemyX2, enemyY2);
+        exit_func(game_state);
     }
 }
 
@@ -54,7 +72,10 @@ void update_character_position(struct state *game_state)
         game_state->animation.characters[0].state = STATE_WALK;
 
         if(mapModY >= MOVE_SPEED || (a != '1' && b != '1'))
+        {
             game_state->animation.characters[0].y -= MOVE_SPEED;
+            game_state->moveCount += 0.5;
+        }
     }
     if (game_state->keys.down)
     {
@@ -64,7 +85,10 @@ void update_character_position(struct state *game_state)
         game_state->animation.characters[0].state = STATE_WALK;
 
         if(a != '1' && b != '1')
+        {
             game_state->animation.characters[0].y += MOVE_SPEED;
+            game_state->moveCount += 0.5;
+        }
     }
     if (game_state->keys.left)
     {
@@ -72,7 +96,10 @@ void update_character_position(struct state *game_state)
         game_state->animation.characters[0].state = STATE_WALK;
 
         if(mapModX >= MOVE_SPEED || (game_state->map[mapY][mapX - 1] != '1' && game_state->map[mapY + (mapModY > 0)][mapX - 1] != '1'))
+        {
             game_state->animation.characters[0].x -= MOVE_SPEED;
+            game_state->moveCount += 0.5;
+        }
     }
     if (game_state->keys.right)
     {
@@ -80,7 +107,10 @@ void update_character_position(struct state *game_state)
         game_state->animation.characters[0].state = STATE_WALK;
 
         if(game_state->map[mapY][mapX + 1] != '1' && game_state->map[mapY + (mapModY > 0)][mapX + 1] != '1')
+        {
             game_state->animation.characters[0].x += MOVE_SPEED;
+            game_state->moveCount += 0.5;
+        }
     }
 
     return;
@@ -97,10 +127,19 @@ void update_enemy_position(struct state *game_state)
 
     // enemyX += (enemyModX >= MOVE_SPEED);
     // enemyY += (enemyModY >= MOVE_SPEED);
+    int tempEnemyX = enemyX;
+    int tempEnemyY = enemyY;
+    if (enemyX > playerX)
+        tempEnemyX += (enemyModX >= MOVE_SPEED);
+
+    if (enemyY > playerY)
+        tempEnemyY += (enemyModY >= MOVE_SPEED);
+
+    printf("enemyX: %d, enemyY: %d, tempEnemyX: %d, tempEnemyY: %d\n", enemyX, enemyY, tempEnemyX, tempEnemyY);
 
     struct posList* path = NULL;
-    aStarAlgo(playerX, playerY, enemyX, enemyY, game_state->map, &game_state->stats, &path);
-    printf("Calculated path from (%d, %d) to (%d, %d)\n", enemyX, enemyY, playerX, playerY);
+    aStarAlgo(playerX, playerY, tempEnemyX, tempEnemyY, game_state->map, &game_state->stats, &path);
+    printf("Calculated path from (%d, %d) to (%d, %d)\n", tempEnemyX, tempEnemyY, playerX, playerY);
     struct posList* temp = path;
     if (temp && temp->next)
     {

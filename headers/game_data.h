@@ -13,8 +13,8 @@ static char* assetFiles[ASSET_COUNT] = {
     "tex/wall0.png",
     "tex/grass0.png",
     "tex/pouch.png",
-    "tex/door.png",
-    "tex/doorOpen.png",
+    "tex/trapDoor.png",
+    "tex/trapDoor1.png",
     "tex/text_bg.png",
     // Player sprites
     "tex/rogue/walk/rogue_D01.png",
@@ -184,7 +184,7 @@ struct state
     void* conn_id;
     void* win_id;
     void* bg;
-    int moveCount;
+    float moveCount;
     int tileWH;
     void* assets[ASSET_COUNT];
     char** map;
