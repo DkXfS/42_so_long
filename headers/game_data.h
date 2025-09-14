@@ -184,7 +184,7 @@ struct state
     void* conn_id;
     void* win_id;
     void* bg;
-    float moveCount;
+    int moveCount;
     int tileWH;
     void* assets[ASSET_COUNT];
     char** map;

@@ -178,10 +178,23 @@ void draw(struct state *game_state)
         mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->assets[5], x, viewport_height);
         x += game_state->tileWH;
     }
+    mlx_string_put(game_state->conn_id, game_state->win_id, 10, viewport_height + (UI_OFFSET/2), 0x00F1F1, "Moves:");
+    char *moves = ft_itoa(game_state->moveCount/2);
+    mlx_string_put(game_state->conn_id, game_state->win_id, 80, viewport_height + (UI_OFFSET/2), 0x00F1F1, moves);
+    mlx_string_put(game_state->conn_id, game_state->win_id, 130, viewport_height + (UI_OFFSET/2), 0x00F1F1, "Collected: ");
+    char *collected = ft_itoa(game_state->collected);
+    mlx_string_put(game_state->conn_id, game_state->win_id, 240, viewport_height + (UI_OFFSET/2), 0x00F1F1, collected);
+    mlx_string_put(game_state->conn_id, game_state->win_id, 260, viewport_height + (UI_OFFSET/2), 0x00F1F1, "/");
+    char *total = ft_itoa(game_state->stats.collectibleCount);
+    mlx_string_put(game_state->conn_id, game_state->win_id, 280, viewport_height + (UI_OFFSET/2), 0x00F1F1, total);
+    mlx_string_put(game_state->conn_id, game_state->win_id, 330, viewport_height + (UI_OFFSET/2), 0x00F1F1, "Inst. FPS:");
     char *fps = ft_itoa(1000000/time_diff);
-    mlx_string_put(game_state->conn_id, game_state->win_id, 10, viewport_height + (UI_OFFSET/2), 0x00F1F1, fps);
+    mlx_string_put(game_state->conn_id, game_state->win_id, 440, viewport_height + (UI_OFFSET/2), 0x00F1F1, fps);
     // ft_printf("FPS: %s\n", fps);
     free(fps);
+    free(moves);
+    free(collected);
+    free(total);
 }
 
 int screen_refresh(void *param)
@@ -218,10 +231,26 @@ void init_state(struct state *game_state)
     game_state->collected = 0;
     game_state->map = NULL;
     game_state->keys = (struct key_states){0};
-    game_state->stats = (struct mapStats){0};
+    game_state->stats.collectibleCount = 0;
+    game_state->stats.width = 0;
+    game_state->stats.height = 0;
+    game_state->stats.playerX = -1;
+    game_state->stats.playerY = -1;
+    game_state->stats.villainX = -1;
+    game_state->stats.villainY = -1;
+    game_state->stats.exitX = -1;
+    game_state->stats.exitY = -1;
+    game_state->stats.shortestRouteLength = 0;
+    game_state->stats.collectibles = NULL;
     game_state->animation = (struct animation){0};
     gettimeofday(&game_state->current_time, NULL);
     gettimeofday(&game_state->last_update_time, NULL);
+}
+
+int isBerFile(const char* filename)
+{
+    char* dot = ft_strrchr(filename, '.');
+    return (dot && !ft_strcmp(dot, ".ber"));
 }
 
 int main(int argc, char **argv)
@@ -234,7 +263,13 @@ int main(int argc, char **argv)
 
     if (argc != 2)
     {
-        ft_printf(RED"Error\nUsage: %s <map_file>\n"RESET, argv[0]);
+        ft_printf(RED"Error\nUsage: %s <map_file.ber>\n"RESET, argv[0]);
+        return 1;
+    }
+
+    if (!isBerFile(argv[1]))
+    {
+        ft_printf(RED"Error\nInvalid map file. Please provide a .ber file.\n"RESET);
         return 1;
     }
 
