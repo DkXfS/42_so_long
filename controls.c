@@ -48,29 +48,21 @@ int key_press_hook(int keycode, struct state *game_state)
     {
         // ft_printf("W/UP key pressed\n");
         game_state->keys.up = 1;
-        game_state->animation.characters[0].direction = ANIM_UP;
-        game_state->animation.characters[0].state = STATE_WALK;
     }
     if (keycode == A_KEY || keycode == ARROW_SX_KEY)
     {
         // ft_printf("A/LEFT key pressed\n");
         game_state->keys.left = 1;
-        game_state->animation.characters[0].direction = ANIM_LEFT;
-        game_state->animation.characters[0].state = STATE_WALK;
     }
     if (keycode == S_KEY || keycode == ARROW_DOWN_KEY)
     {
         // ft_printf("S/DOWN key pressed\n");
         game_state->keys.down = 1;
-        game_state->animation.characters[0].direction = ANIM_DOWN;
-        game_state->animation.characters[0].state = STATE_WALK;
     }
     if (keycode == D_KEY || keycode == ARROW_DX_KEY)
     {
         // ft_printf("D/RIGHT key pressed\n");
         game_state->keys.right = 1;
-        game_state->animation.characters[0].direction = ANIM_RIGHT;
-        game_state->animation.characters[0].state = STATE_WALK;
     }
     if (keycode == ESC_KEY)
     {

@@ -31,10 +31,10 @@ void check_collisions(struct state *game_state)
             ft_printf("All collectibles gathered! You win!\n");
             exit_func(game_state);
         }
-        else
-        {
-            ft_printf("Collect all items before exiting! (%d/%d)\n", game_state->collected, game_state->stats.collectibleCount);
-        }
+        // else
+        // {
+        //     ft_printf("Collect all items before exiting! (%d/%d)\n", game_state->collected, game_state->stats.collectibleCount);
+        // }
     }
 }
 
@@ -50,42 +50,149 @@ void update_character_position(struct state *game_state)
     {
         a = game_state->map[mapY - 1][mapX];
         b = game_state->map[mapY - 1][mapX + (mapModX > 0)];
+        game_state->animation.characters[0].direction = ANIM_UP;
+        game_state->animation.characters[0].state = STATE_WALK;
 
         if(mapModY >= MOVE_SPEED || (a != '1' && b != '1'))
             game_state->animation.characters[0].y -= MOVE_SPEED;
-        
-        // if (mapModY <= MOVE_SPEED && (a == 'C' || b == 'C'))
-        // {
-        //     game_state->map[mapY - 1][mapX + (mapModX > 0)] = '0';
-        //     game_state->collected++;
-        //     ft_printf("Collected: %d\n", game_state->collected);
-        // }
     }
     if (game_state->keys.down)
     {
         a = game_state->map[mapY + 1][mapX];
         b = game_state->map[mapY + 1][mapX + (mapModX > 0)];
+        game_state->animation.characters[0].direction = ANIM_DOWN;
+        game_state->animation.characters[0].state = STATE_WALK;
 
         if(a != '1' && b != '1')
             game_state->animation.characters[0].y += MOVE_SPEED;
-
-        // if(a == 'C' || b == 'C')
-        // {
-        //     game_state->map[mapY + 1][mapX + (mapModX > 0)] = '0';
-        //     game_state->collected++;
-        //     ft_printf("Collected: %d\n", game_state->collected);
-        // }
     }
     if (game_state->keys.left)
     {
+        game_state->animation.characters[0].direction = ANIM_LEFT;
+        game_state->animation.characters[0].state = STATE_WALK;
+
         if(mapModX >= MOVE_SPEED || (game_state->map[mapY][mapX - 1] != '1' && game_state->map[mapY + (mapModY > 0)][mapX - 1] != '1'))
             game_state->animation.characters[0].x -= MOVE_SPEED;
     }
     if (game_state->keys.right)
     {
+        game_state->animation.characters[0].direction = ANIM_RIGHT;
+        game_state->animation.characters[0].state = STATE_WALK;
+
         if(game_state->map[mapY][mapX + 1] != '1' && game_state->map[mapY + (mapModY > 0)][mapX + 1] != '1')
             game_state->animation.characters[0].x += MOVE_SPEED;
     }
 
     return;
+}
+
+void update_enemy_position(struct state *game_state)
+{
+    int enemyX = game_state->animation.characters[1].x / game_state->tileWH;
+    int enemyY = game_state->animation.characters[1].y / game_state->tileWH;
+    int enemyModX = game_state->animation.characters[1].x % game_state->tileWH;
+    int enemyModY = game_state->animation.characters[1].y % game_state->tileWH;
+    int playerX = game_state->animation.characters[0].x / game_state->tileWH;
+    int playerY = game_state->animation.characters[0].y / game_state->tileWH;
+
+    // enemyX += (enemyModX >= MOVE_SPEED);
+    // enemyY += (enemyModY >= MOVE_SPEED);
+
+    struct posList* path = NULL;
+    aStarAlgo(playerX, playerY, enemyX, enemyY, game_state->map, &game_state->stats, &path);
+    printf("Calculated path from (%d, %d) to (%d, %d)\n", enemyX, enemyY, playerX, playerY);
+    struct posList* temp = path;
+    if (temp && temp->next)
+    {
+        temp = temp->next;
+        printf("Enemy at (%d, %d)\n", enemyX, enemyY);
+        printf("Enemy moving to (%d, %d)\n", temp->x, temp->y);
+
+        if (temp->x > enemyX)
+        {
+            if (game_state->map[enemyY][enemyX + 1] != '1' && game_state->map[enemyY + (enemyModY > 0)][enemyX + 1] != '1')
+            {
+                game_state->animation.characters[1].x += MOVE_SPEED;
+                game_state->animation.characters[1].direction = ANIM_RIGHT;
+                game_state->animation.characters[1].state = STATE_WALK;
+            }
+        }
+        if (temp->x < enemyX || (temp->x == enemyX && enemyModX >= MOVE_SPEED))
+        {
+            if (game_state->map[enemyY][enemyX - 1] != '1' && game_state->map[enemyY + (enemyModY > 0)][enemyX - 1] != '1')
+            {
+                game_state->animation.characters[1].x -= MOVE_SPEED;
+                game_state->animation.characters[1].direction = ANIM_LEFT;
+                game_state->animation.characters[1].state = STATE_WALK;
+            }
+        }
+        if (temp->y > enemyY)
+        {
+            if (game_state->map[enemyY + 1][enemyX] != '1' && game_state->map[enemyY + 1][enemyX + (enemyModX > 0)] != '1')
+            {
+                game_state->animation.characters[1].y += MOVE_SPEED;
+                game_state->animation.characters[1].direction = ANIM_DOWN;
+                game_state->animation.characters[1].state = STATE_WALK;
+            }
+        }
+        if (temp->y < enemyY || (temp->y == enemyY && enemyModY >= MOVE_SPEED))
+        {
+            if (game_state->map[enemyY - 1][enemyX] != '1' && game_state->map[enemyY - 1][enemyX + (enemyModX > 0)] != '1')
+            {
+                game_state->animation.characters[1].y -= MOVE_SPEED;
+                game_state->animation.characters[1].direction = ANIM_UP;
+                game_state->animation.characters[1].state = STATE_WALK;
+            }
+        }
+    }
+    else
+    {
+        game_state->animation.characters[1].state = STATE_IDLE;
+        game_state->animation.characters[1].curr_frame = 0;
+    }
+    
+    if (path)
+        free_pos_list(path);
+
+    // if (enemyX < playerX)
+    // {
+    //     if (game_state->map[enemyY][enemyX + 1] != '1')
+    //     {
+    //         game_state->animation.characters[1].x += MOVE_SPEED;
+    //         game_state->animation.characters[1].direction = ANIM_RIGHT;
+    //         game_state->animation.characters[1].state = STATE_WALK;
+    //     }
+    // }
+    // else if (enemyX > playerX)
+    // {
+    //     if (game_state->map[enemyY][enemyX - 1] != '1')
+    //     {
+    //         game_state->animation.characters[1].x -= MOVE_SPEED;
+    //         game_state->animation.characters[1].direction = ANIM_LEFT;
+    //         game_state->animation.characters[1].state = STATE_WALK;
+    //     }
+    // }
+    // else if (enemyY < playerY)
+    // {
+    //     if (game_state->map[enemyY + 1][enemyX] != '1')
+    //     {
+    //         game_state->animation.characters[1].y += MOVE_SPEED;
+    //         game_state->animation.characters[1].direction = ANIM_DOWN;
+    //         game_state->animation.characters[1].state = STATE_WALK;
+    //     }
+    // }
+    // else if (enemyY > playerY)
+    // {
+    //     if (game_state->map[enemyY - 1][enemyX] != '1')
+    //     {
+    //         game_state->animation.characters[1].y -= MOVE_SPEED;
+    //         game_state->animation.characters[1].direction = ANIM_UP;
+    //         game_state->animation.characters[1].state = STATE_WALK;
+    //     }
+    // }
+    // else
+    // {
+    //     game_state->animation.characters[1].state = STATE_IDLE;
+    //     game_state->animation.characters[1].curr_frame = 0;
+    // }
 }

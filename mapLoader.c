@@ -67,7 +67,7 @@ int validateMap(char* buffer, struct mapStats* stats)
             {
                 // Validate character
                 if (buffer[i] != '1' && buffer[i] != '0' && buffer[i] != 'C' && 
-                    buffer[i] != 'E' && buffer[i] != 'P')
+                    buffer[i] != 'E' && buffer[i] != 'P' && buffer[i] != 'V')
                 {
                     ft_printf(RED"Error\n%s\n"RESET, "Invalid character in map");
                     return 0;
@@ -86,6 +86,11 @@ int validateMap(char* buffer, struct mapStats* stats)
                     exitCount++;
                     stats->exitX = currentLineLength;
                     stats->exitY = height;
+                }
+                else if (buffer[i] == 'V')
+                {
+                    stats->villainX = currentLineLength;
+                    stats->villainY = height;
                 }
                 else if (buffer[i] == 'C')
                 {

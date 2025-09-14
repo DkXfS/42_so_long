@@ -3,7 +3,7 @@
 
 #include <sys/time.h>
 
-#define CHARACTERS_COUNT 1
+#define CHARACTERS_COUNT 2
 #define WORLD_ANIM_COUNT 0
 
 // Animation states
@@ -15,12 +15,14 @@
 #define ANIM_UP 2
 #define ANIM_DOWN 3
 
+// UNUSED
 #define MAIN_CHARACTER 0
 #define ENEMY_CHARACTER 1
 #define COLLECTIBLE 2
 #define EXIT 3
 #define BACKGROUND 4
 #define WALL 5
+// UNUSED
 
 struct character
 {

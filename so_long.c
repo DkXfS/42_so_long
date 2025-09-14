@@ -9,23 +9,29 @@
 
 int instance_chars(struct state *game_state)
 {
-    // Initialize character animation state and frame counters
     for (int i = 0; i < CHARACTERS_COUNT; i++)
     {
-        game_state->animation.characters[i].state = STATE_IDLE; // default state
-        game_state->animation.characters[i].direction = ANIM_UP; // default direction
+        game_state->animation.characters[i].state = STATE_IDLE;
+        game_state->animation.characters[i].direction = ANIM_UP;
         game_state->animation.characters[i].curr_frame = 0;
-        game_state->animation.characters[i].x = game_state->stats.playerX * game_state->tileWH;
-        game_state->animation.characters[i].y = game_state->stats.playerY * game_state->tileWH;
+        if(i)
+        {
+            game_state->animation.characters[i].x = game_state->stats.villainX * game_state->tileWH;
+            game_state->animation.characters[i].y = game_state->stats.villainY * game_state->tileWH;
+        }
+        else
+        {
+            game_state->animation.characters[i].x = game_state->stats.playerX * game_state->tileWH;
+            game_state->animation.characters[i].y = game_state->stats.playerY * game_state->tileWH;
+        }
 
-        // Load player walk sprites
         int j = 0;
         while (j < 15)
         {
-            game_state->animation.characters[i].animations[STATE_WALK][ANIM_DOWN][j] = game_state->assets[j + 6];
-            game_state->animation.characters[i].animations[STATE_WALK][ANIM_UP][j] = game_state->assets[j + 15 + 6];
-            game_state->animation.characters[i].animations[STATE_WALK][ANIM_LEFT][j] = game_state->assets[j + 30 + 6];
-            game_state->animation.characters[i].animations[STATE_WALK][ANIM_RIGHT][j] = game_state->assets[j + 45 + 6];
+            game_state->animation.characters[i].animations[STATE_WALK][ANIM_DOWN][j] = game_state->assets[j + (i * 64) + 6];
+            game_state->animation.characters[i].animations[STATE_WALK][ANIM_UP][j] = game_state->assets[j + 15 + (i * 64) + 6];
+            game_state->animation.characters[i].animations[STATE_WALK][ANIM_LEFT][j] = game_state->assets[j + 30 + (i * 64) + 6];
+            game_state->animation.characters[i].animations[STATE_WALK][ANIM_RIGHT][j] = game_state->assets[j + 45 + (i * 64) + 6];
             j++;
         }
         game_state->animation.characters[i].animations[STATE_WALK][ANIM_DOWN][j] = NULL;
@@ -33,13 +39,13 @@ int instance_chars(struct state *game_state)
         game_state->animation.characters[i].animations[STATE_WALK][ANIM_LEFT][j] = NULL;
         game_state->animation.characters[i].animations[STATE_WALK][ANIM_RIGHT][j] = NULL;
 
-        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_DOWN][0] = game_state->assets[66];
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_DOWN][0] = game_state->assets[66 + (i * 64)];
         game_state->animation.characters[i].animations[STATE_IDLE][ANIM_DOWN][1] = NULL;
-        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_UP][0] = game_state->assets[67];
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_UP][0] = game_state->assets[67 + (i * 64)];
         game_state->animation.characters[i].animations[STATE_IDLE][ANIM_UP][1] = NULL;
-        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_LEFT][0] = game_state->assets[68];
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_LEFT][0] = game_state->assets[68 + (i * 64)];
         game_state->animation.characters[i].animations[STATE_IDLE][ANIM_LEFT][1] = NULL;
-        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_RIGHT][0] = game_state->assets[69];
+        game_state->animation.characters[i].animations[STATE_IDLE][ANIM_RIGHT][0] = game_state->assets[69 + (i * 64)];
         game_state->animation.characters[i].animations[STATE_IDLE][ANIM_RIGHT][1] = NULL;
     }
     return 1;
@@ -144,8 +150,8 @@ void draw(struct state *game_state)
                     img = game_state->assets[3];
                 mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->assets[1], x * game_state->tileWH + draw_offset_x, y * game_state->tileWH + draw_offset_y);
             }
-            else if (tile == 'P') // Player start position
-                img = game_state->assets[1]; // Draw grass under player
+            else if (tile == 'P' || tile == 'V')
+                img = game_state->assets[1];
 
             if (img)
                 mlx_put_image_to_window(game_state->conn_id, game_state->win_id, img, x * game_state->tileWH + draw_offset_x, y * game_state->tileWH + draw_offset_y);
@@ -192,6 +198,7 @@ int screen_refresh(void *param)
     // printf("Current time: %ld.%06d\n", game_state->current_time.tv_sec, game_state->current_time.tv_usec);
 
     update_character_position(game_state);
+    update_enemy_position(game_state);
     check_collisions(game_state);
 
     update_frames(&game_state->animation, game_state->current_time);
