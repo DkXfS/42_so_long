@@ -4,6 +4,7 @@
 // #include "gameState.h"
 #include "../minilibx_mms_20200219/mlx.h"
 #include "../ft_printf/ft_printf.h"
+#include "../libft/libft.h"
 #include "colors.h"
 #include "animation.h"
 
@@ -183,7 +184,6 @@ struct state
 {
     void* conn_id;
     void* win_id;
-    void* bg;
     int moveCount;
     int tileWH;
     void* assets[ASSET_COUNT];
@@ -193,9 +193,13 @@ struct state
     struct mapStats stats;
     struct animation animation;
     struct timeval current_time;
-    struct timeval last_update_time;
+    struct timeval last_refresh_time;
+    struct timeval last_movement_time;
 };
 
 int load_assets(struct state *game_state);
+void free_assets(struct state *game_state);
+void init_state(struct state *game_state);
+int time_diff_usec(struct timeval* end, struct timeval* start);
 
 #endif

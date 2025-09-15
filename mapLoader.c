@@ -1,5 +1,20 @@
 #include "headers/mapLoader.h"
 
+void free_map(char** map)
+{
+    char** tmp = map;
+
+    if (!map)
+        return;
+
+    while (*map)
+    {
+        free(*map);
+        map++;
+    }
+    free(tmp);
+}
+
 int validateMap(char* buffer, struct mapStats* stats)
 {
     int firstLineLength = 0;  // Length of the first line to compare against
@@ -202,7 +217,6 @@ char** loadMap(const char* filename, struct mapStats* stats)
     if (!mapStr)
     {
         perror("Failed to allocate memory for map");
-        close(fd);
         return NULL;
     }
 
@@ -210,6 +224,7 @@ char** loadMap(const char* filename, struct mapStats* stats)
 	if (fd == -1)
 	{
         perror(RED"Error\n%s\n"RESET);
+        free(mapStr);
 		return NULL;
 	}
 
@@ -224,29 +239,25 @@ char** loadMap(const char* filename, struct mapStats* stats)
     }
 
     trimmedMapStr = ft_strtrim(mapStr, "\n");
+    free(mapStr);
     if (!trimmedMapStr)
     {
         ft_printf(RED"Error\n%s\n"RESET, "Failed to trim map string");
-        free(mapStr);
         return NULL;
     }
-    free(mapStr);
 
     mapArr = ft_split(trimmedMapStr, '\n');
+    free(trimmedMapStr);
     if (!mapArr)
     {
         ft_printf(RED"Error\n%s\n"RESET, "Failed to split map string into array");
-        free(trimmedMapStr);
         return NULL;
     }
-    free(trimmedMapStr);
 
     if (!isCompletable(mapArr, stats))
     {
         ft_printf(RED"Error\n%s\n"RESET, "No valid completion path in map");
-        for (int i = 0; mapArr[i]; i++)
-            free(mapArr[i]);
-        free(mapArr);
+        free_map(mapArr);
         return NULL;
     }
 

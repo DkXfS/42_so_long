@@ -15,5 +15,6 @@
 #include <string.h> // For strerror
 
 char** loadMap(const char* filename, struct mapStats* stats);
+void free_map(char** map);
 
 #endif

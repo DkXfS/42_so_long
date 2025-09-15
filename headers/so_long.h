@@ -8,7 +8,6 @@
 #include "controls.h"
 #include "movement.h"
 #include "../minilibx_mms_20200219/mlx.h"
-#include "../libft/libft.h"
 #include "../ft_printf/ft_printf.h"
 
 #define NUM_TILES_WIDTH 15

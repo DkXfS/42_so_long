@@ -54,15 +54,10 @@ int instance_chars(struct state *game_state)
 int exit_func(void *param)
 {
     struct state *game_state = (struct state *)param;
+    free_assets(game_state);
     mlx_destroy_window(game_state->conn_id, game_state->win_id);
     free(game_state->conn_id);
-
-    // Free the allocated memory for the map
-    for (int i = 0; game_state->map[i]; i++)
-    {
-        free(game_state->map[i]);
-    }
-    free(game_state->map);
+    free_map(game_state->map);
     exit(0);
 
     return 0;
@@ -71,14 +66,13 @@ int exit_func(void *param)
 void draw(struct state *game_state)
 {
     mlx_clear_window(game_state->conn_id, game_state->win_id);
-    // mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->bg, 0, 0);
-    int time_diff = (game_state->current_time.tv_sec - game_state->last_update_time.tv_sec) * 1000000;
+    int time_diff = game_state->current_time.tv_sec - game_state->last_refresh_time.tv_sec;
     if(time_diff > 0)
-        time_diff = (time_diff - 1) + game_state->current_time.tv_usec + (1000000 - game_state->last_update_time.tv_usec);
-    else  
-        time_diff = game_state->current_time.tv_usec - game_state->last_update_time.tv_usec;
-    game_state->last_update_time.tv_sec = game_state->current_time.tv_sec;
-    game_state->last_update_time.tv_usec = game_state->current_time.tv_usec;
+        time_diff = time_diff * 1000000 + game_state->current_time.tv_usec + (1000000 - game_state->last_refresh_time.tv_usec);
+    else
+        time_diff = game_state->current_time.tv_usec - game_state->last_refresh_time.tv_usec;
+    game_state->last_refresh_time.tv_sec = game_state->current_time.tv_sec;
+    game_state->last_refresh_time.tv_usec = game_state->current_time.tv_usec;
 
     // printf("Map dimensions: %dx%d\n", game_state->stats.width, game_state->stats.height);
     // return;
@@ -187,11 +181,11 @@ void draw(struct state *game_state)
     mlx_string_put(game_state->conn_id, game_state->win_id, 260, viewport_height + (UI_OFFSET/2), 0x00F1F1, "/");
     char *total = ft_itoa(game_state->stats.collectibleCount);
     mlx_string_put(game_state->conn_id, game_state->win_id, 280, viewport_height + (UI_OFFSET/2), 0x00F1F1, total);
-    mlx_string_put(game_state->conn_id, game_state->win_id, 330, viewport_height + (UI_OFFSET/2), 0x00F1F1, "Inst. FPS:");
-    char *fps = ft_itoa(1000000/time_diff);
-    mlx_string_put(game_state->conn_id, game_state->win_id, 440, viewport_height + (UI_OFFSET/2), 0x00F1F1, fps);
+    // mlx_string_put(game_state->conn_id, game_state->win_id, 330, viewport_height + (UI_OFFSET/2), 0x00F1F1, "Inst. FPS:");
+    // char *fps = ft_itoa(1000000/time_diff);
+    // mlx_string_put(game_state->conn_id, game_state->win_id, 440, viewport_height + (UI_OFFSET/2), 0x00F1F1, fps);
     // ft_printf("FPS: %s\n", fps);
-    free(fps);
+    // free(fps);
     free(moves);
     free(collected);
     free(total);
@@ -210,41 +204,15 @@ int screen_refresh(void *param)
     gettimeofday(&game_state->current_time, NULL);
     // printf("Current time: %ld.%06d\n", game_state->current_time.tv_sec, game_state->current_time.tv_usec);
 
-    update_character_position(game_state);
-    update_enemy_position(game_state);
-    check_collisions(game_state);
+    // update_character_position(game_state);
+    // update_enemy_position(game_state);
+    // check_collisions(game_state);
+    update_positions(game_state);
 
     update_frames(&game_state->animation, game_state->current_time);
     draw(game_state);
 
     return 0;
-}
-
-void init_state(struct state *game_state)
-{
-    game_state->conn_id = NULL;
-    game_state->win_id = NULL;
-    game_state->bg = NULL;
-    game_state->moveCount = 0;
-    game_state->tileWH = 0;
-    ft_bzero(game_state->assets, sizeof(game_state->assets));
-    game_state->collected = 0;
-    game_state->map = NULL;
-    game_state->keys = (struct key_states){0};
-    game_state->stats.collectibleCount = 0;
-    game_state->stats.width = 0;
-    game_state->stats.height = 0;
-    game_state->stats.playerX = -1;
-    game_state->stats.playerY = -1;
-    game_state->stats.villainX = -1;
-    game_state->stats.villainY = -1;
-    game_state->stats.exitX = -1;
-    game_state->stats.exitY = -1;
-    game_state->stats.shortestRouteLength = 0;
-    game_state->stats.collectibles = NULL;
-    game_state->animation = (struct animation){0};
-    gettimeofday(&game_state->current_time, NULL);
-    gettimeofday(&game_state->last_update_time, NULL);
 }
 
 int isBerFile(const char* filename)
@@ -313,13 +281,6 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    // game_state.bg = mlx_png_file_to_image(game_state.conn_id, "tex/bg.png", &(int){800}, &(int){600});
-    // if (!game_state.bg)
-    // {
-    //     ft_printf(RED"Error\nFailed to load background image\n"RESET);
-    //     return 1;
-    // }
-
     if(!instance_chars(&game_state))
     {
         ft_printf(RED"Error\nFailed to instance characters\n"RESET);
@@ -330,7 +291,7 @@ int main(int argc, char **argv)
     mlx_hook(game_state.win_id, 3, 1L << 1, key_release_hook, &game_state);       // Mask unused on Macos Metal
     mlx_hook(game_state.win_id, 17, 1L << 2, exit_func, &game_state);       // Mask unused on Macos Metal
     // mlx_key_hook(game_state.win_id, key_hook, &game_state);
-    mlx_mouse_hook(game_state.win_id, mouse_hook, &game_state);
+    // mlx_mouse_hook(game_state.win_id, mouse_hook, &game_state);
     mlx_loop_hook(game_state.conn_id, screen_refresh, &game_state);
     // int imgWH = 3;
     // game_state.player_sprites[0] = mlx_png_file_to_image(game_state.conn_id, "tex/rogue/rogue_w1.png", &imgWH, &imgWH);
