@@ -57,6 +57,8 @@ void update_character_position(struct state *game_state, int mult)
     int mapModY = game_state->animation.characters[0].y % game_state->tileWH;
     char a, b;
 
+    ft_printf("mapX: %d", mapX);
+    ft_printf(", mapY: %d\n", mapY);
     if (game_state->keys.up)
     {
         a = game_state->map[mapY - 1][mapX];
@@ -64,7 +66,7 @@ void update_character_position(struct state *game_state, int mult)
         game_state->animation.characters[0].direction = ANIM_UP;
         game_state->animation.characters[0].state = STATE_WALK;
 
-        if(mapModY >= MOVE_SPEED || (a != '1' && b != '1'))
+        if(mapModY >= MOVE_SPEED * mult || (a != '1' && b != '1'))
         {
             game_state->animation.characters[0].y -= MOVE_SPEED * mult;
             game_state->moveCount++;
@@ -87,8 +89,10 @@ void update_character_position(struct state *game_state, int mult)
     {
         game_state->animation.characters[0].direction = ANIM_LEFT;
         game_state->animation.characters[0].state = STATE_WALK;
+        a = game_state->map[mapY][mapX - 1];
+        b = game_state->map[mapY + (mapModY > 0)][mapX - 1];
 
-        if(mapModX >= MOVE_SPEED || (game_state->map[mapY][mapX - 1] != '1' && game_state->map[mapY + (mapModY > 0)][mapX - 1] != '1'))
+        if(mapModX >= MOVE_SPEED * mult || (a != '1' && b != '1'))
         {
             game_state->animation.characters[0].x -= MOVE_SPEED * mult;
             game_state->moveCount++;
@@ -98,8 +102,10 @@ void update_character_position(struct state *game_state, int mult)
     {
         game_state->animation.characters[0].direction = ANIM_RIGHT;
         game_state->animation.characters[0].state = STATE_WALK;
+        a = game_state->map[mapY][mapX + 1];
+        b = game_state->map[mapY + (mapModY > 0)][mapX + 1];
 
-        if(game_state->map[mapY][mapX + 1] != '1' && game_state->map[mapY + (mapModY > 0)][mapX + 1] != '1')
+        if(a != '1' && b != '1')
         {
             game_state->animation.characters[0].x += MOVE_SPEED * mult;
             game_state->moveCount++;
@@ -238,7 +244,7 @@ void update_positions(struct state *game_state)
         game_state->last_movement_time.tv_usec = game_state->current_time.tv_usec;
         
         update_character_position(game_state, updates);
-        // update_enemy_position(game_state, updates);
+        update_enemy_position(game_state, updates);
         check_collisions(game_state);
     }
 }
