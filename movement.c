@@ -57,8 +57,8 @@ void update_character_position(struct state *game_state, int mult)
     int mapModY = game_state->animation.characters[0].y % game_state->tileWH;
     char a, b;
 
-    ft_printf("mapX: %d", mapX);
-    ft_printf(", mapY: %d\n", mapY);
+    // ft_printf("mapX: %d", mapX);
+    // ft_printf(", mapY: %d\n", mapY);
     while (mult--)
     {
         if (game_state->keys.up)
@@ -135,62 +135,61 @@ void update_enemy_position(struct state *game_state, int mult)
     int playerX = game_state->animation.characters[0].x / game_state->tileWH;
     int playerY = game_state->animation.characters[0].y / game_state->tileWH;
 
-    // enemyX += (enemyModX >= MOVE_SPEED);
-    // enemyY += (enemyModY >= MOVE_SPEED);
-    int tempEnemyX = enemyX;
-    int tempEnemyY = enemyY;
-    if (enemyX > playerX)
-        tempEnemyX += (enemyModX >= MOVE_SPEED);
-
-    if (enemyY > playerY)
-        tempEnemyY += (enemyModY >= MOVE_SPEED);
-
-    printf("enemyX: %d, enemyY: %d, tempEnemyX: %d, tempEnemyY: %d\n", enemyX, enemyY, tempEnemyX, tempEnemyY);
-
     struct posList* path = NULL;
-    aStarAlgo(playerX, playerY, tempEnemyX, tempEnemyY, game_state->map, &game_state->stats, &path);
-    printf("Calculated path from (%d, %d) to (%d, %d)\n", tempEnemyX, tempEnemyY, playerX, playerY);
+    aStarAlgo(playerX, playerY, enemyX, enemyY, game_state->map, &game_state->stats, &path);
+    // printf("Calculated path from (%d, %d) to (%d, %d)\n", enemyX, enemyY, playerX, playerY);
     struct posList* temp = path;
     if (temp && temp->next)
     {
         temp = temp->next;
-        printf("Enemy at (%d, %d)\n", enemyX, enemyY);
-        printf("Enemy moving to (%d, %d)\n", temp->x, temp->y);
+        // printf("Enemy at (%d, %d)\n", enemyX, enemyY);
+        // printf("Enemy moving to (%d, %d)\n", temp->x, temp->y);
 
-        if (temp->x > enemyX)
+        while (mult--)
         {
-            if (game_state->map[enemyY][enemyX + 1] != '1' && game_state->map[enemyY + (enemyModY > 0)][enemyX + 1] != '1')
+            if (temp->x > enemyX)
             {
-                game_state->animation.characters[1].x += MOVE_SPEED * mult;
-                game_state->animation.characters[1].direction = ANIM_RIGHT;
-                game_state->animation.characters[1].state = STATE_WALK;
+                if (game_state->map[enemyY][enemyX + 1] != '1' && game_state->map[enemyY + (enemyModY > 0)][enemyX + 1] != '1')
+                {
+                    game_state->animation.characters[1].x += MOVE_SPEED;
+                    game_state->animation.characters[1].direction = ANIM_RIGHT;
+                    game_state->animation.characters[1].state = STATE_WALK;
+                    enemyX = game_state->animation.characters[1].x / game_state->tileWH;
+                    enemyModX = game_state->animation.characters[1].x % game_state->tileWH;
+                }
             }
-        }
-        if (temp->x < enemyX || (temp->x == enemyX && enemyModX >= MOVE_SPEED))
-        {
-            if (game_state->map[enemyY][enemyX - 1] != '1' && game_state->map[enemyY + (enemyModY > 0)][enemyX - 1] != '1')
+            if (temp->x < enemyX || (temp->x == enemyX && enemyModX >= MOVE_SPEED))
             {
-                game_state->animation.characters[1].x -= MOVE_SPEED * mult;
-                game_state->animation.characters[1].direction = ANIM_LEFT;
-                game_state->animation.characters[1].state = STATE_WALK;
+                if (enemyModX >= MOVE_SPEED || (game_state->map[enemyY][enemyX - 1] != '1' && game_state->map[enemyY + (enemyModY > 0)][enemyX - 1] != '1'))
+                {
+                    game_state->animation.characters[1].x -= MOVE_SPEED;
+                    game_state->animation.characters[1].direction = ANIM_LEFT;
+                    game_state->animation.characters[1].state = STATE_WALK;
+                    enemyX = game_state->animation.characters[1].x / game_state->tileWH;
+                    enemyModX = game_state->animation.characters[1].x % game_state->tileWH;
+                }
             }
-        }
-        if (temp->y > enemyY)
-        {
-            if (game_state->map[enemyY + 1][enemyX] != '1' && game_state->map[enemyY + 1][enemyX + (enemyModX > 0)] != '1')
+            if (temp->y > enemyY)
             {
-                game_state->animation.characters[1].y += MOVE_SPEED * mult;
-                game_state->animation.characters[1].direction = ANIM_DOWN;
-                game_state->animation.characters[1].state = STATE_WALK;
+                if (game_state->map[enemyY + 1][enemyX] != '1' && game_state->map[enemyY + 1][enemyX + (enemyModX > 0)] != '1')
+                {
+                    game_state->animation.characters[1].y += MOVE_SPEED;
+                    game_state->animation.characters[1].direction = ANIM_DOWN;
+                    game_state->animation.characters[1].state = STATE_WALK;
+                    enemyY = game_state->animation.characters[1].y / game_state->tileWH;
+                    enemyModY = game_state->animation.characters[1].y % game_state->tileWH;
+                }
             }
-        }
-        if (temp->y < enemyY || (temp->y == enemyY && enemyModY >= MOVE_SPEED))
-        {
-            if (game_state->map[enemyY - 1][enemyX] != '1' && game_state->map[enemyY - 1][enemyX + (enemyModX > 0)] != '1')
+            if (temp->y < enemyY || (temp->y == enemyY && enemyModY >= MOVE_SPEED))
             {
-                game_state->animation.characters[1].y -= MOVE_SPEED * mult;
-                game_state->animation.characters[1].direction = ANIM_UP;
-                game_state->animation.characters[1].state = STATE_WALK;
+                if (enemyModY >= MOVE_SPEED || (game_state->map[enemyY - 1][enemyX] != '1' && game_state->map[enemyY - 1][enemyX + (enemyModX > 0)] != '1'))
+                {
+                    game_state->animation.characters[1].y -= MOVE_SPEED;
+                    game_state->animation.characters[1].direction = ANIM_UP;
+                    game_state->animation.characters[1].state = STATE_WALK;
+                    enemyY = game_state->animation.characters[1].y / game_state->tileWH;
+                    enemyModY = game_state->animation.characters[1].y % game_state->tileWH;
+                }
             }
         }
     }
