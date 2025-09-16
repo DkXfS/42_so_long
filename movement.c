@@ -59,56 +59,67 @@ void update_character_position(struct state *game_state, int mult)
 
     ft_printf("mapX: %d", mapX);
     ft_printf(", mapY: %d\n", mapY);
-    if (game_state->keys.up)
+    while (mult--)
     {
-        a = game_state->map[mapY - 1][mapX];
-        b = game_state->map[mapY - 1][mapX + (mapModX > 0)];
-        game_state->animation.characters[0].direction = ANIM_UP;
-        game_state->animation.characters[0].state = STATE_WALK;
-
-        if(mapModY >= MOVE_SPEED * mult || (a != '1' && b != '1'))
+        if (game_state->keys.up)
         {
-            game_state->animation.characters[0].y -= MOVE_SPEED * mult;
-            game_state->moveCount++;
+            a = game_state->map[mapY - 1][mapX];
+            b = game_state->map[mapY - 1][mapX + (mapModX > 0)];
+            game_state->animation.characters[0].direction = ANIM_UP;
+            game_state->animation.characters[0].state = STATE_WALK;
+        
+            if(mapModY >= MOVE_SPEED || (a != '1' && b != '1'))
+            {
+                game_state->animation.characters[0].y -= MOVE_SPEED;
+                game_state->moveCount++;
+                mapY = game_state->animation.characters[0].y / game_state->tileWH;
+                mapModY = game_state->animation.characters[0].y % game_state->tileWH;
+            }
         }
-    }
-    if (game_state->keys.down)
-    {
-        a = game_state->map[mapY + 1][mapX];
-        b = game_state->map[mapY + 1][mapX + (mapModX > 0)];
-        game_state->animation.characters[0].direction = ANIM_DOWN;
-        game_state->animation.characters[0].state = STATE_WALK;
-
-        if(a != '1' && b != '1')
+        if (game_state->keys.down)
         {
-            game_state->animation.characters[0].y += MOVE_SPEED * mult;
-            game_state->moveCount++;
+            a = game_state->map[mapY + 1][mapX];
+            b = game_state->map[mapY + 1][mapX + (mapModX > 0)];
+            game_state->animation.characters[0].direction = ANIM_DOWN;
+            game_state->animation.characters[0].state = STATE_WALK;
+        
+            if(a != '1' && b != '1') // && mapModY < (game_state->tileWH - MOVE_SPEED)
+            {
+                game_state->animation.characters[0].y += MOVE_SPEED;
+                game_state->moveCount++;
+                mapY = game_state->animation.characters[0].y / game_state->tileWH;
+                mapModY = game_state->animation.characters[0].y % game_state->tileWH;
+            }
         }
-    }
-    if (game_state->keys.left)
-    {
-        game_state->animation.characters[0].direction = ANIM_LEFT;
-        game_state->animation.characters[0].state = STATE_WALK;
-        a = game_state->map[mapY][mapX - 1];
-        b = game_state->map[mapY + (mapModY > 0)][mapX - 1];
-
-        if(mapModX >= MOVE_SPEED * mult || (a != '1' && b != '1'))
+        if (game_state->keys.left)
         {
-            game_state->animation.characters[0].x -= MOVE_SPEED * mult;
-            game_state->moveCount++;
+            game_state->animation.characters[0].direction = ANIM_LEFT;
+            game_state->animation.characters[0].state = STATE_WALK;
+            a = game_state->map[mapY][mapX - 1];
+            b = game_state->map[mapY + (mapModY > 0)][mapX - 1];
+        
+            if(mapModX >= MOVE_SPEED || (a != '1' && b != '1'))
+            {
+                game_state->animation.characters[0].x -= MOVE_SPEED;
+                game_state->moveCount++;
+                mapX = game_state->animation.characters[0].x / game_state->tileWH;
+                mapModX = game_state->animation.characters[0].x % game_state->tileWH;
+            }
         }
-    }
-    if (game_state->keys.right)
-    {
-        game_state->animation.characters[0].direction = ANIM_RIGHT;
-        game_state->animation.characters[0].state = STATE_WALK;
-        a = game_state->map[mapY][mapX + 1];
-        b = game_state->map[mapY + (mapModY > 0)][mapX + 1];
-
-        if(a != '1' && b != '1')
+        if (game_state->keys.right)
         {
-            game_state->animation.characters[0].x += MOVE_SPEED * mult;
-            game_state->moveCount++;
+            game_state->animation.characters[0].direction = ANIM_RIGHT;
+            game_state->animation.characters[0].state = STATE_WALK;
+            a = game_state->map[mapY][mapX + 1];
+            b = game_state->map[mapY + (mapModY > 0)][mapX + 1];
+        
+            if(a != '1' && b != '1') // && mapModX < (game_state->tileWH - MOVE_SPEED)
+            {
+                game_state->animation.characters[0].x += MOVE_SPEED;
+                game_state->moveCount++;
+                mapX = game_state->animation.characters[0].x / game_state->tileWH;
+                mapModX = game_state->animation.characters[0].x % game_state->tileWH;
+            }
         }
     }
 
