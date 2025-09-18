@@ -11,7 +11,7 @@ void check_collisions(struct state *game_state)
         game_state->map[y2][x1] == 'C' || game_state->map[y2][x2] == 'C')
     {
         game_state->collected++;
-        ft_printf("Collected: %d\n", game_state->collected);
+        ft_printf(MAG"Collected: %d\n"RESET, game_state->collected);
         if (game_state->map[y1][x1] == 'C')
             game_state->map[y1][x1] = '0';
         if (game_state->map[y1][x2] == 'C')
@@ -43,8 +43,6 @@ void check_collisions(struct state *game_state)
     if (x2 > enemyX1 && enemyX2 > x1 && y2 > enemyY1 && enemyY2 > y1)
     {
         ft_printf(RED"Game Over!\n"RESET"Caught by the enemy!\n");
-        printf("Player 1(%d, %d), 2(%d, %d)\n", x1, y1, x2, y2);
-        printf("Enemy 1(%d, %d), 2(%d, %d)\n", enemyX1, enemyY1, enemyX2, enemyY2);
         exit_func(game_state);
     }
 }

@@ -87,6 +87,7 @@ int instance_chars(struct state *game_state)
 
 int exit_func(void *param)
 {
+    ft_printf(GRN"Exiting game...\n"RESET);
     struct state *game_state = (struct state *)param;
     free_assets(game_state, ASSET_COUNT);
     mlx_destroy_window(game_state->conn_id, game_state->win_id);
@@ -220,7 +221,7 @@ int screen_refresh(void *param)
 
     if(game_state->keys.escRelease)
     {
-        ft_printf("Escape key pressed\n");
+        ft_printf(YEL"Escape key pressed\n"RESET);
         exit_func(game_state);
     }
 
@@ -259,29 +260,33 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    ft_printf(GRN"Loading map...");
     game_state.map = loadMap(argv[1], &game_state.stats);
     if (!game_state.map) {
         ft_printf(RED"Error\nFailed to load map\n"RESET);
         return 1;
     }
-
-    ft_printf(GRN"Map loaded successfully!\n"RESET);
+    ft_printf("   Success\n"RESET);
 
     // Initialize animation timing
     gettimeofday(&game_state.animation.last_frame_time, NULL);
 
+    ft_printf(GRN"Initializing MLX...");
     game_state.conn_id = mlx_init();
     if (!game_state.conn_id)
     {
         ft_printf(RED"Error\nFailed to initialize MLX\n"RESET);
         return 1;
     }
+    ft_printf("   Success\n"RESET);
 
+    ft_printf(GRN"Loading assets...");
     if(!load_assets(&game_state))
     {
         ft_printf(RED"Error\nFailed to load assets\n"RESET);
         return 1;
     }
+    ft_printf("   Success\n"RESET);
 
     if (game_state.stats.width < window_width)
         window_width = game_state.stats.width;
@@ -290,23 +295,32 @@ int main(int argc, char **argv)
     window_width = window_width * game_state.tileWH;
     window_height = window_height * game_state.tileWH + UI_OFFSET;
 
+    ft_printf(GRN"Creating window...");
     game_state.win_id = mlx_new_window(game_state.conn_id, window_width, window_height, "so_long");
     if (!game_state.win_id)
     {
         ft_printf(RED"Error\nFailed to create window\n"RESET);
         return 1;
     }
+    ft_printf("   Success\n"RESET);
 
+    ft_printf(GRN"Instancing characters...");
     if(!instance_chars(&game_state))
     {
         ft_printf(RED"Error\nFailed to instance characters\n"RESET);
         return 1;
     }
+    ft_printf("   Success\n"RESET);
 
     mlx_hook(game_state.win_id, 2, 1L << 0, key_press_hook, &game_state);       // Mask unused on Macos Metal
     mlx_hook(game_state.win_id, 3, 1L << 1, key_release_hook, &game_state);       // Mask unused on Macos Metal
     mlx_hook(game_state.win_id, 17, 1L << 2, exit_func, &game_state);       // Mask unused on Macos Metal
     mlx_loop_hook(game_state.conn_id, screen_refresh, &game_state);
+
+    ft_printf(GRN"Starting game loop...\n"RESET);
+    // ft_printf(WHTB"\n"RESET);
+    ft_printf("\n");
+    ft_printf(BBLU"Use arrow keys or WASD to move. To exit press ESC or click the close button.\n"RESET);
     mlx_loop(game_state.conn_id);
 
     return 0;
