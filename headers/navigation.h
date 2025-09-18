@@ -4,7 +4,6 @@
 #include "game_data.h"
 #include <math.h>
 #include <float.h>
-#include <stdio.h>
 
 struct node
 {

@@ -69,11 +69,13 @@ void printPath(int height, int width, struct node nodes[height][width], int dest
 {
     if (nodes[destY][destX].parent_x == destX && nodes[destY][destX].parent_y == destY)
     {
-        printf("(%d, %d) -> ", destX, destY);
+        ft_printf("(%d, ", destX);
+        ft_printf("%d) -> ", destY);
         return;
     }
     printPath(height, width, nodes, nodes[destY][destX].parent_x, nodes[destY][destX].parent_y);
-    printf("(%d, %d) -> ", destX, destY);
+    ft_printf("(%d, ", destX);
+    ft_printf("%d) -> ", destY);
 }
 
 void free_pos_list(struct posList* path)

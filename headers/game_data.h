@@ -1,7 +1,6 @@
 #ifndef GAME_DATA_H
 #define GAME_DATA_H
 
-// #include "gameState.h"
 #include "../minilibx_mms_20200219/mlx.h"
 #include "../ft_printf/ft_printf.h"
 #include "../libft/libft.h"

@@ -15,22 +15,13 @@
 #define ANIM_UP 2
 #define ANIM_DOWN 3
 
-// UNUSED
-#define MAIN_CHARACTER 0
-#define ENEMY_CHARACTER 1
-#define COLLECTIBLE 2
-#define EXIT 3
-#define BACKGROUND 4
-#define WALL 5
-// UNUSED
-
 struct character
 {
     int x;
     int y;
-    int state; // e.g., idle, walking, jumping
-    int direction; // e.g., left, right, up, down
-    int curr_frame; // current frame in animation
+    int state;
+    int direction;
+    int curr_frame;
     void* animations[2][4][16];
 };
 

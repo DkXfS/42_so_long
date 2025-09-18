@@ -57,8 +57,6 @@ void update_character_position(struct state *game_state, int mult)
     int mapModY = game_state->animation.characters[0].y % game_state->tileWH;
     char a, b;
 
-    // ft_printf("mapX: %d", mapX);
-    // ft_printf(", mapY: %d\n", mapY);
     while (mult--)
     {
         if (game_state->keys.up)
@@ -83,7 +81,7 @@ void update_character_position(struct state *game_state, int mult)
             game_state->animation.characters[0].direction = ANIM_DOWN;
             game_state->animation.characters[0].state = STATE_WALK;
         
-            if(a != '1' && b != '1') // && mapModY < (game_state->tileWH - MOVE_SPEED)
+            if(a != '1' && b != '1')
             {
                 game_state->animation.characters[0].y += MOVE_SPEED;
                 game_state->moveCount++;
@@ -113,7 +111,7 @@ void update_character_position(struct state *game_state, int mult)
             a = game_state->map[mapY][mapX + 1];
             b = game_state->map[mapY + (mapModY > 0)][mapX + 1];
         
-            if(a != '1' && b != '1') // && mapModX < (game_state->tileWH - MOVE_SPEED)
+            if(a != '1' && b != '1')
             {
                 game_state->animation.characters[0].x += MOVE_SPEED;
                 game_state->moveCount++;
@@ -137,13 +135,10 @@ void update_enemy_position(struct state *game_state, int mult)
 
     struct posList* path = NULL;
     aStarAlgo(playerX, playerY, enemyX, enemyY, game_state->map, &game_state->stats, &path);
-    // printf("Calculated path from (%d, %d) to (%d, %d)\n", enemyX, enemyY, playerX, playerY);
     struct posList* temp = path;
     if (temp && temp->next)
     {
         temp = temp->next;
-        // printf("Enemy at (%d, %d)\n", enemyX, enemyY);
-        // printf("Enemy moving to (%d, %d)\n", temp->x, temp->y);
 
         while (mult--)
         {
@@ -201,48 +196,6 @@ void update_enemy_position(struct state *game_state, int mult)
     
     if (path)
         free_pos_list(path);
-
-    // if (enemyX < playerX)
-    // {
-    //     if (game_state->map[enemyY][enemyX + 1] != '1')
-    //     {
-    //         game_state->animation.characters[1].x += MOVE_SPEED;
-    //         game_state->animation.characters[1].direction = ANIM_RIGHT;
-    //         game_state->animation.characters[1].state = STATE_WALK;
-    //     }
-    // }
-    // else if (enemyX > playerX)
-    // {
-    //     if (game_state->map[enemyY][enemyX - 1] != '1')
-    //     {
-    //         game_state->animation.characters[1].x -= MOVE_SPEED;
-    //         game_state->animation.characters[1].direction = ANIM_LEFT;
-    //         game_state->animation.characters[1].state = STATE_WALK;
-    //     }
-    // }
-    // else if (enemyY < playerY)
-    // {
-    //     if (game_state->map[enemyY + 1][enemyX] != '1')
-    //     {
-    //         game_state->animation.characters[1].y += MOVE_SPEED;
-    //         game_state->animation.characters[1].direction = ANIM_DOWN;
-    //         game_state->animation.characters[1].state = STATE_WALK;
-    //     }
-    // }
-    // else if (enemyY > playerY)
-    // {
-    //     if (game_state->map[enemyY - 1][enemyX] != '1')
-    //     {
-    //         game_state->animation.characters[1].y -= MOVE_SPEED;
-    //         game_state->animation.characters[1].direction = ANIM_UP;
-    //         game_state->animation.characters[1].state = STATE_WALK;
-    //     }
-    // }
-    // else
-    // {
-    //     game_state->animation.characters[1].state = STATE_IDLE;
-    //     game_state->animation.characters[1].curr_frame = 0;
-    // }
 }
 
 void update_positions(struct state *game_state)

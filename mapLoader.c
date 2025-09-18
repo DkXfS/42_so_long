@@ -17,10 +17,10 @@ void free_map(char** map)
 
 int validateMap(char* buffer, struct mapStats* stats)
 {
-    int firstLineLength = 0;  // Length of the first line to compare against
-    int currentLineLength = 0; // Length of the current line being processed
-    int wallCount = 0;        // Count of wall characters in current line
-    int height = 0;           // Total number of lines (height of the map)
+    int firstLineLength = 0;
+    int currentLineLength = 0;
+    int wallCount = 0;
+    int height = 0;
     int playerCount = 0;
     int exitCount = 0;
     int collectibleCount = 0;
@@ -38,10 +38,9 @@ int validateMap(char* buffer, struct mapStats* stats)
     while(buffer[i] == '\n')
         i++;
 
-    // First pass: Calculate the length of the first line
     while (buffer[i] && buffer[i] != '\n')
     {
-        if (buffer[i] != '1') // First line should be all walls
+        if (buffer[i] != '1')
         {
             ft_printf(RED"Error\n%s\n"RESET, "Map must be enclosed by walls");
             return 0;
@@ -50,24 +49,20 @@ int validateMap(char* buffer, struct mapStats* stats)
         i++;
     }
     
-    // Skip the newline character
     if (buffer[i] == '\n')
     {
         height++;
         i++;
     }
     
-    // Continue validating the rest of the map
     while (buffer[i])
     {
         if (buffer[i] != '\n')
         {
-            hasClosedPlayableArea = 0; // Reset for each new line
-            // Start of a new line
+            hasClosedPlayableArea = 0;
             currentLineLength = 0;
             wallCount = 0;
             
-            // First character of each line must be a wall
             if (buffer[i] != '1')
             {
                 ft_printf(RED"Error\n%s\n"RESET, "Walls must enclose the map (left side)");
@@ -77,10 +72,8 @@ int validateMap(char* buffer, struct mapStats* stats)
             currentLineLength++;
             i++;
 
-            // Process the middle of the current line
             while (buffer[i] && buffer[i] != '\n')
             {
-                // Validate character
                 if (buffer[i] != '1' && buffer[i] != '0' && buffer[i] != 'C' && 
                     buffer[i] != 'E' && buffer[i] != 'P' && buffer[i] != 'V')
                 {
@@ -121,7 +114,6 @@ int validateMap(char* buffer, struct mapStats* stats)
                     newCollectible->y = height;
                     newCollectible->next = NULL;
 
-                    // Add to the collectibles list
                     if (!stats->collectibles)
                         stats->collectibles = newCollectible;
                     else
@@ -134,7 +126,6 @@ int validateMap(char* buffer, struct mapStats* stats)
             }
             height++;
 
-            // Verify the line length matches the first line
             if (currentLineLength && currentLineLength != firstLineLength)
             {
                 ft_printf(RED"Error\n%s\n"RESET, "Map must be rectangular");
@@ -142,7 +133,6 @@ int validateMap(char* buffer, struct mapStats* stats)
                 return 0;
             }
 
-            // Last character of the line should be a wall
             if (buffer[i-1] != '1')
             {
                 ft_printf(RED"Error\n%s\n"RESET, "Walls must enclose the map (right side)");
@@ -161,10 +151,9 @@ int validateMap(char* buffer, struct mapStats* stats)
                 return 0;
             }
 
-            // Check if this is the last line (all walls)
             if (wallCount == firstLineLength && playerCount == 1 && exitCount == 1 && collectibleCount)
             {
-                hasClosedPlayableArea = 1; // Valid map
+                hasClosedPlayableArea = 1;
             }
         }
         else if (!hasClosedPlayableArea)

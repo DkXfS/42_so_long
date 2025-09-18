@@ -1,12 +1,6 @@
 #include "headers/so_long.h"
 #include <sys/time.h>
 
-// struct timeval
-// {
-//     time_t       tv_sec;   /* seconds since Jan. 1, 1970 */
-//     suseconds_t  tv_usec;  /* and microseconds */
-// };
-
 void draw_ui(struct state* game_state, int time_diff, int window_width, int viewport_height)
 {
     char *moves_num = NULL;
@@ -46,7 +40,8 @@ void draw_ui(struct state* game_state, int time_diff, int window_width, int view
 
 int instance_chars(struct state *game_state)
 {
-    for (int i = 0; i < CHARACTERS_COUNT; i++)
+    int i = 0;
+    while (i < CHARACTERS_COUNT)
     {
         game_state->animation.characters[i].state = STATE_IDLE;
         game_state->animation.characters[i].direction = ANIM_UP;
@@ -84,6 +79,8 @@ int instance_chars(struct state *game_state)
         game_state->animation.characters[i].animations[STATE_IDLE][ANIM_LEFT][1] = NULL;
         game_state->animation.characters[i].animations[STATE_IDLE][ANIM_RIGHT][0] = game_state->assets[69 + (i * 64)];
         game_state->animation.characters[i].animations[STATE_IDLE][ANIM_RIGHT][1] = NULL;
+
+        i++;
     }
     return 1;
 }
@@ -110,9 +107,6 @@ void draw(struct state *game_state)
         time_diff = game_state->current_time.tv_usec - game_state->last_refresh_time.tv_usec;
     game_state->last_refresh_time.tv_sec = game_state->current_time.tv_sec;
     game_state->last_refresh_time.tv_usec = game_state->current_time.tv_usec;
-
-    // printf("Map dimensions: %dx%d\n", game_state->stats.width, game_state->stats.height);
-    // return;
 
     int draw_offset_x = 0;
     int draw_offset_y = 0;
@@ -146,22 +140,29 @@ void draw(struct state *game_state)
         else if (draw_offset_y < -(map_height - viewport_height))
             draw_offset_y = -(map_height - viewport_height);
     }
-
-    /// Draw map based on game_state->map
+    
+    int x = 0;
+    int y = 0;
     int draw_x, draw_y;
-    for (int y = 0; y < game_state->stats.height; y++)
+    while (y < game_state->stats.height)
     {
         draw_y = y * game_state->tileWH + draw_offset_y;
         if (draw_y < -game_state->tileWH || draw_y >= viewport_height)
+        {
+            y++;
             continue;
+        }
         
-        for (int x = 0; x < game_state->stats.width; x++)
+        x = 0;
+        while (x < game_state->stats.width)
         {
             draw_x = x * game_state->tileWH + draw_offset_x;
             if (draw_x < -game_state->tileWH || draw_x >= window_width)
+            {
+                x++;
                 continue;
+            }
 
-            // printf("Drawing tile at (%d, %d): %c\n", x, y, game_state->map[y][x]);
             char tile = game_state->map[y][x];
             void *img = NULL;
             if (tile == '1') // Wall
@@ -186,21 +187,28 @@ void draw(struct state *game_state)
 
             if (img)
                 mlx_put_image_to_window(game_state->conn_id, game_state->win_id, img, x * game_state->tileWH + draw_offset_x, y * game_state->tileWH + draw_offset_y);
+
+            x++;
         }
+        y++;
     }
 
-    for (int i = 0; i < WORLD_ANIM_COUNT; i++)
+    x = 0;
+    while (x < WORLD_ANIM_COUNT)
     {
         mlx_put_image_to_window(game_state->conn_id, game_state->win_id,
-                               game_state->animation.world_elements[i].frames[game_state->animation.world_elements[i].curr_frame],
-                               game_state->animation.world_elements[i].x + draw_offset_x, game_state->animation.world_elements[i].y + draw_offset_y);
+                               game_state->animation.world_elements[x].frames[game_state->animation.world_elements[x].curr_frame],
+                               game_state->animation.world_elements[x].x + draw_offset_x, game_state->animation.world_elements[x].y + draw_offset_y);
+        x++;
     }
 
-    for (int i = 0; i < CHARACTERS_COUNT; i++)
+    x = 0;
+    while (x < CHARACTERS_COUNT)
     {
         mlx_put_image_to_window(game_state->conn_id, game_state->win_id,
-                               game_state->animation.characters[i].animations[game_state->animation.characters[i].state][game_state->animation.characters[i].direction][game_state->animation.characters[i].curr_frame],
-                               game_state->animation.characters[i].x + draw_offset_x, game_state->animation.characters[i].y + draw_offset_y);
+                               game_state->animation.characters[x].animations[game_state->animation.characters[x].state][game_state->animation.characters[x].direction][game_state->animation.characters[x].curr_frame],
+                               game_state->animation.characters[x].x + draw_offset_x, game_state->animation.characters[x].y + draw_offset_y);
+        x++;
     }
 
     draw_ui(game_state, time_diff, window_width, viewport_height);
@@ -217,11 +225,6 @@ int screen_refresh(void *param)
     }
 
     gettimeofday(&game_state->current_time, NULL);
-    // printf("Current time: %ld.%06d\n", game_state->current_time.tv_sec, game_state->current_time.tv_usec);
-
-    // update_character_position(game_state);
-    // update_enemy_position(game_state);
-    // check_collisions(game_state);
     update_positions(game_state);
 
     update_frames(&game_state->animation, game_state->current_time);
@@ -258,7 +261,7 @@ int main(int argc, char **argv)
 
     game_state.map = loadMap(argv[1], &game_state.stats);
     if (!game_state.map) {
-        fprintf(stderr, "Failed to load map\n");
+        ft_printf(RED"Error\nFailed to load map\n"RESET);
         return 1;
     }
 
@@ -279,8 +282,6 @@ int main(int argc, char **argv)
         ft_printf(RED"Error\nFailed to load assets\n"RESET);
         return 1;
     }
-
-    ft_printf(GRN"tile size: %d\n"RESET, game_state.tileWH);
 
     if (game_state.stats.width < window_width)
         window_width = game_state.stats.width;
@@ -305,17 +306,7 @@ int main(int argc, char **argv)
     mlx_hook(game_state.win_id, 2, 1L << 0, key_press_hook, &game_state);       // Mask unused on Macos Metal
     mlx_hook(game_state.win_id, 3, 1L << 1, key_release_hook, &game_state);       // Mask unused on Macos Metal
     mlx_hook(game_state.win_id, 17, 1L << 2, exit_func, &game_state);       // Mask unused on Macos Metal
-    // mlx_key_hook(game_state.win_id, key_hook, &game_state);
-    // mlx_mouse_hook(game_state.win_id, mouse_hook, &game_state);
     mlx_loop_hook(game_state.conn_id, screen_refresh, &game_state);
-    // int imgWH = 3;
-    // game_state.player_sprites[0] = mlx_png_file_to_image(game_state.conn_id, "tex/rogue/rogue_w1.png", &imgWH, &imgWH);
-    // game_state.player_sprites[1] = mlx_png_file_to_image(game_state.conn_id, "tex/rogue/rogue_w0.png", &imgWH, &imgWH);
-    // if (img)
-    //     mlx_put_image_to_window(game_state.conn_id, game_state.win_id, img, 10, 10);
-    // else
-    //     ft_printf(RED"Error\nFailed to load image\n"RESET);
-
     mlx_loop(game_state.conn_id);
 
     return 0;
