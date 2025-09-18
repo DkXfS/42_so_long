@@ -4,3 +4,7 @@
 *.dylib
 *.a
 minilibx_mms_*
+*.png~
+*.jpg~
+*.jpeg~
+*.gif~
