@@ -3,7 +3,7 @@
 *.o
 *.dylib
 *.a
-minilibx_mms_*
+# minilibx_mms_*
 *.png~
 *.jpg~
 *.jpeg~
