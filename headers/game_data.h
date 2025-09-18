@@ -198,7 +198,7 @@ struct state
 };
 
 int load_assets(struct state *game_state);
-void free_assets(struct state *game_state);
+void free_assets(struct state *game_state, int upto);
 void init_state(struct state *game_state);
 int time_diff_usec(struct timeval* end, struct timeval* start);
 

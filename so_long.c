@@ -91,7 +91,7 @@ int instance_chars(struct state *game_state)
 int exit_func(void *param)
 {
     struct state *game_state = (struct state *)param;
-    free_assets(game_state);
+    free_assets(game_state, ASSET_COUNT);
     mlx_destroy_window(game_state->conn_id, game_state->win_id);
     free(game_state->conn_id);
     free_map(game_state->map);
