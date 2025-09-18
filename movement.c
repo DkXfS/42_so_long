@@ -40,7 +40,7 @@ void check_collisions(struct state *game_state)
     x2 = (game_state->animation.characters[0].x + game_state->tileWH);
     y2 = (game_state->animation.characters[0].y + game_state->tileWH);
 
-    if (x2 > enemyX1 && enemyX2 > x1 && y2 > enemyY1 && enemyY2 > y1)
+    if (x2 > enemyX1 + 28 && enemyX2 > x1 + 28 && y2 > enemyY1 + 28 && enemyY2 > y1 + 28) // ~43.7% tile overlap
     {
         ft_printf(RED"Game Over!\n"RESET"Caught by the enemy!\n");
         exit_func(game_state);
@@ -134,9 +134,10 @@ void update_enemy_position(struct state *game_state, int mult)
     struct posList* path = NULL;
     aStarAlgo(playerX, playerY, enemyX, enemyY, game_state->map, &game_state->stats, &path);
     struct posList* temp = path;
-    if (temp && temp->next)
+    if (temp || enemyModX || enemyModY)
     {
-        temp = temp->next;
+        if (temp->next)
+            temp = temp->next;
 
         while (mult--)
         {

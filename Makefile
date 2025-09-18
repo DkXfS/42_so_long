@@ -1,6 +1,6 @@
 NAME=so_long
 
-CFLAGS=-Wall -Wextra -Werror -g # -O3
+CFLAGS=-Wall -Wextra -Werror -O3
 LFLAGS=-lmlx -L . -L ft_printf -lftprintf -L libft -lft
 
 SRCS=so_long.c \
