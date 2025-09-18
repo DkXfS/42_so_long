@@ -7,6 +7,43 @@
 //     suseconds_t  tv_usec;  /* and microseconds */
 // };
 
+void draw_ui(struct state* game_state, int time_diff, int window_width, int viewport_height)
+{
+    char *moves_num = NULL;
+    char* moves_ui = NULL;
+    char* collected_num = NULL;
+    char* collected_ui1 = NULL;
+    char* collected_ui2 = NULL;
+    char* collected_ui = NULL;
+    char* total = NULL;
+    char *fps = NULL, *fps_ui = NULL;
+
+    int x = 0;
+    while (x <= window_width)
+    {
+        mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->assets[5], x, viewport_height);
+        x += game_state->tileWH;
+    }
+    if ((moves_num = ft_itoa(game_state->moveCount/2)) && (moves_ui = ft_strjoin("Moves: ", moves_num)))
+        mlx_string_put(game_state->conn_id, game_state->win_id, 10, viewport_height + (UI_OFFSET/2), 0x00F1F1, moves_ui);
+    if ((collected_num = ft_itoa(game_state->collected)) && (total = ft_itoa(game_state->stats.collectibleCount)))
+        if ((collected_ui1 = ft_strjoin("Collected: ", collected_num)) && (collected_ui2 = ft_strjoin("/", total)))
+            if ((collected_ui = ft_strjoin(collected_ui1, collected_ui2)))
+                mlx_string_put(game_state->conn_id, game_state->win_id, 150, viewport_height + (UI_OFFSET/2), 0x00F1F1, collected_ui);
+    if ((fps = ft_itoa(1000000/time_diff)) && (fps_ui = ft_strjoin("Inst. FPS: ", fps)))
+        mlx_string_put(game_state->conn_id, game_state->win_id, 340, viewport_height + (UI_OFFSET/2), 0x00F1F1, fps_ui);
+    // ft_printf("FPS: %s\n", fps);
+    free(fps);
+    free(fps_ui);
+    free(moves_num);
+    free(moves_ui);
+    free(collected_num);
+    free(collected_ui1);
+    free(collected_ui2);
+    free(collected_ui);
+    free(total);
+}
+
 int instance_chars(struct state *game_state)
 {
     for (int i = 0; i < CHARACTERS_COUNT; i++)
@@ -166,29 +203,7 @@ void draw(struct state *game_state)
                                game_state->animation.characters[i].x + draw_offset_x, game_state->animation.characters[i].y + draw_offset_y);
     }
 
-    int x = 0;
-    while (x <= window_width)
-    {
-        mlx_put_image_to_window(game_state->conn_id, game_state->win_id, game_state->assets[5], x, viewport_height);
-        x += game_state->tileWH;
-    }
-    mlx_string_put(game_state->conn_id, game_state->win_id, 10, viewport_height + (UI_OFFSET/2), 0x00F1F1, "Moves:");
-    char *moves = ft_itoa(game_state->moveCount/2);
-    mlx_string_put(game_state->conn_id, game_state->win_id, 80, viewport_height + (UI_OFFSET/2), 0x00F1F1, moves);
-    mlx_string_put(game_state->conn_id, game_state->win_id, 130, viewport_height + (UI_OFFSET/2), 0x00F1F1, "Collected: ");
-    char *collected = ft_itoa(game_state->collected);
-    mlx_string_put(game_state->conn_id, game_state->win_id, 240, viewport_height + (UI_OFFSET/2), 0x00F1F1, collected);
-    mlx_string_put(game_state->conn_id, game_state->win_id, 260, viewport_height + (UI_OFFSET/2), 0x00F1F1, "/");
-    char *total = ft_itoa(game_state->stats.collectibleCount);
-    mlx_string_put(game_state->conn_id, game_state->win_id, 280, viewport_height + (UI_OFFSET/2), 0x00F1F1, total);
-    // mlx_string_put(game_state->conn_id, game_state->win_id, 330, viewport_height + (UI_OFFSET/2), 0x00F1F1, "Inst. FPS:");
-    // char *fps = ft_itoa(1000000/time_diff);
-    // mlx_string_put(game_state->conn_id, game_state->win_id, 440, viewport_height + (UI_OFFSET/2), 0x00F1F1, fps);
-    // ft_printf("FPS: %s\n", fps);
-    // free(fps);
-    free(moves);
-    free(collected);
-    free(total);
+    draw_ui(game_state, time_diff, window_width, viewport_height);
 }
 
 int screen_refresh(void *param)
